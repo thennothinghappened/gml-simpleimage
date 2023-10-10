@@ -46,7 +46,7 @@ if (parameter_count() >= 1) {
 			continue;
 		}
 		
-		if (!array_contains(exts, string_lower(filename_ext(str))) {
+		if (!array_contains(exts, string_lower(filename_ext(str)))) {
 			continue;
 		}
 		
