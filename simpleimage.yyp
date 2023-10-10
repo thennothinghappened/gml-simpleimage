@@ -10,7 +10,9 @@
     "name": "Default",
   },
   "defaultScriptType": 1,
-  "Folders": [],
+  "Folders": [
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"util","folderPath":"folders/util.yy",},
+  ],
   "IncludedFiles": [],
   "isEcma": false,
   "LibraryEmitters": [],
