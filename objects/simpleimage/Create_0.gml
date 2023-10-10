@@ -8,9 +8,6 @@
 application_surface_enable(false);
 application_surface_draw_enable(false);
 
-draw_set_halign(fa_center);
-draw_set_valign(fa_middle);
-
 window_width = window_get_width();
 window_height = window_get_height();
 
@@ -35,7 +32,41 @@ state = State.Idle;
 
 /// the file we're currently viewing
 file = undefined;
-dir = undefined;
+dir_name = undefined;
+dir_list = undefined;
+
+enum LoadDirListResult {
+	Success,
+	NoChange,
+	NonExistentError
+}
+
+/// load the directory listing for a given filepath, if changed.
+load_dir_list = function(filepath, force = false) {
+	var new_dir_name = filename_dir(filepath);
+	
+	if (new_dir_name == dir_name && !force) {
+		return LoadDirListResult.NoChange;
+	}
+	
+	if (!directory_exists(new_dir_name)) {
+		return LoadDirListResult.NonExistentError;
+	}
+	
+	dir_name = new_dir_name;
+	dir_list = [];
+	
+	var file = file_find_first($"{new_dir_name}/*.*", fa_none);
+	
+	while (file != "") {
+		array_push(dir_list, file);
+		file = file_find_next();
+	}
+	
+	file_find_close();
+	
+	return LoadDirListResult.Success;
+}
 
 handlers = [];
 
@@ -251,22 +282,23 @@ point_from_canvas = function(x, y) {
 canvas_load_from_file = function(filepath) {
 	
 	var res = image_load(filepath);
+	file = filepath;
 	
-	if (res.result != ImageLoadResult.Loaded) {
+	if (res.result == ImageLoadResult.Loaded) {
+		
+		canvas_replace(res.img);
+		sprite_delete(res.img);
+		
 		return res.result;
 	}
 	
-	canvas_replace(res.img);
-	
-	sprite_delete(res.img);
-	
-	file = filepath;
+	canvas_replace(fail_img);
 	
 	return res.result;
 }
 
 /// replace the canvas with a new image! (i.e. load a new img)
-/// @param {Id.Sprite} img
+/// @param {Asset.GMSprite} img
 canvas_replace = function(img) {
 	canvas_width = sprite_get_width(img);
 	canvas_height = sprite_get_height(img);
@@ -282,6 +314,13 @@ canvas_replace = function(img) {
 	bg_refresh();
 	
 	canvas_scale = min(window_width / canvas_width, window_height / canvas_height);
+	canvas_center();
+}
+
+/// center the canvas
+canvas_center = function() {
+	canvas_pan_x = (window_width / 2) - (canvas_width / 2 * canvas_scale);
+	canvas_pan_y = (window_height / 2) - (canvas_height / 2 * canvas_scale);
 }
 
 #endregion
@@ -318,6 +357,10 @@ gui_redraw = true;
 /// draw the gui
 gui_draw = function() {
 	
+	if (file != undefined) {
+		draw_text(0, 0, file);
+	}
+	
 	gui_redraw = false;
 }
 
@@ -345,8 +388,18 @@ on_window_resize = function(new_width, new_height) {
 	surface_free(gui_surface);
 }
 
+/// called when the user loads a file
+on_load_canvas = function(filepath) {
+	
+	gui_redraw = true;
+	
+	load_dir_list(filepath);
+	canvas_load_from_file(filepath);
+
+}
+
 /// called when the user hits load
-on_load_canvas = function() {
+on_file_picker = function() {
 	
 	var filepath = get_open_filename("*", "");
 	
@@ -354,7 +407,7 @@ on_load_canvas = function() {
 		return;
 	}
 	
-	canvas_load_from_file(filepath);
+	on_load_canvas(filepath);
 
 }
 
@@ -368,11 +421,27 @@ on_view_context = function() {
 	state = State.Idle;
 }
 
+/// called on panning with arrow keys
 on_arrow_pan = function(xdir, ydir) {
 	
 	static pan_speed = 16;
 	
 	canvas_translate(xdir * pan_speed, ydir * pan_speed);
+}
+
+/// called on viewing the next or previous image in the folder
+on_view_next = function(dir) {
+	if (file == undefined || dir_list == undefined) {
+		return;
+	}
+	
+	var ind = array_get_index(dir_list, filename_name(file)) + dir;
+	
+	if (ind < 0 || ind >= array_length(dir_list)) {
+		return;
+	}
+	
+	on_load_canvas($"{filename_dir(file)}/{dir_list[ind]}");
 }
 
 /// called on zooming in and out on the canvas
@@ -390,6 +459,6 @@ on_zoom = function(delta, window_center_x, window_center_y) {
 
 #region Final Init!
 
-on_load_canvas();
+on_file_picker();
 
 #endregion

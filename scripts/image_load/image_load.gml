@@ -9,6 +9,10 @@ enum ImageLoadResult {
 function image_load(url) {
 	try {
 		var img = sprite_add(url, 0, false, false, 0, 0);
+		if (!sprite_exists(img)) {
+			throw "Failed to load sprite";
+		}
+		
 		return { result: ImageLoadResult.Loaded, img: img };
 	} catch (e) {
 		return { result: ImageLoadResult.InvalidImage };

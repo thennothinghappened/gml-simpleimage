@@ -20,6 +20,7 @@
     "IDEVersion": "2023.8.1.102",
   },
   "resources": [
+    {"id":{"name":"fail_img","path":"sprites/fail_img/fail_img.yy",},},
     {"id":{"name":"simpleimage","path":"objects/simpleimage/simpleimage.yy",},},
     {"id":{"name":"surface_buffer_size","path":"scripts/surface_buffer_size/surface_buffer_size.yy",},},
     {"id":{"name":"image_load","path":"scripts/image_load/image_load.yy",},},
