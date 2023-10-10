@@ -16,6 +16,7 @@ window_height = window_get_height();
 
 /// fps to run at normally
 normal_fps = 60;
+
 /// fps to run at while panning/zooming around
 draw_fps = 240;
 
@@ -31,6 +32,10 @@ enum State {
 
 /// What we're currently doing!
 state = State.Idle;
+
+/// the file we're currently viewing
+file = undefined;
+dir = undefined;
 
 handlers = [];
 
@@ -255,6 +260,8 @@ canvas_load_from_file = function(filepath) {
 	
 	sprite_delete(res.img);
 	
+	file = filepath;
+	
 	return res.result;
 }
 
@@ -359,7 +366,13 @@ on_fullscreen_toggle = function() {
 /// called on viewing the context menu
 on_view_context = function() {
 	state = State.Idle;
+}
+
+on_arrow_pan = function(xdir, ydir) {
 	
+	static pan_speed = 16;
+	
+	canvas_translate(xdir * pan_speed, ydir * pan_speed);
 }
 
 /// called on zooming in and out on the canvas
@@ -377,7 +390,6 @@ on_zoom = function(delta, window_center_x, window_center_y) {
 
 #region Final Init!
 
-canvas = surface_create(canvas_width, canvas_height);
-canvas_create_backup();
+on_load_canvas();
 
 #endregion
