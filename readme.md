@@ -1,4 +1,5 @@
 # gml-simpleimage
+<img src="./example.png">
 A simple image viewer for GameMaker!
 
 This isn't particularly anything special, but I'm working on a simple editor at
