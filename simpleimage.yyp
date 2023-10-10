@@ -21,6 +21,9 @@
   },
   "resources": [
     {"id":{"name":"simpleimage","path":"objects/simpleimage/simpleimage.yy",},},
+    {"id":{"name":"surface_buffer_size","path":"scripts/surface_buffer_size/surface_buffer_size.yy",},},
+    {"id":{"name":"image_load","path":"scripts/image_load/image_load.yy",},},
+    {"id":{"name":"bg","path":"sprites/bg/bg.yy",},},
     {"id":{"name":"RmContainer","path":"rooms/RmContainer/RmContainer.yy",},},
   ],
   "RoomOrderNodes": [

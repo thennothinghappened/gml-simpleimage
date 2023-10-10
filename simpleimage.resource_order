@@ -4,6 +4,8 @@
   ],
   "ResourceOrderSettings": [
     {"name":"simpleimage","order":2,"path":"objects/simpleimage/simpleimage.yy",},
+    {"name":"image_load","order":1,"path":"scripts/image_load/image_load.yy",},
+    {"name":"bg","order":4,"path":"sprites/bg/bg.yy",},
     {"name":"RmContainer","order":1,"path":"rooms/RmContainer/RmContainer.yy",},
   ],
 }
