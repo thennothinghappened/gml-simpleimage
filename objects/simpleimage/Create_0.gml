@@ -36,10 +36,15 @@ handlers = [];
 
 handlers[State.Idle] = function() {
 	
-	if (click[MouseButtons.Right][0] == ClickState.Pressed) {
+	if (click[MouseButtons.Left][0] == ClickState.Pressed) {
 		game_set_speed(draw_fps, gamespeed_fps);
-		
 		state = State.ClickPanning;
+		
+		return;
+	}
+	
+	if (click[MouseButtons.Right][0] == ClickState.Released) {
+		on_view_context();
 		return;
 	}
 	
@@ -53,23 +58,10 @@ handlers[State.Idle] = function() {
 
 handlers[State.ClickPanning] = function() {
 	
-	/// min distance before the pan won't open context menu
-	static pan_dist_threshold = 16;
-	
-	if (click[MouseButtons.Right][0] == ClickState.Released) {
+	if (click[MouseButtons.Left][0] == ClickState.Released) {
 		
 		game_set_speed(normal_fps, gamespeed_fps);
-		
 		state = State.Idle;
-		
-		if (point_distance(
-			click[MouseButtons.Right][2],
-			click[MouseButtons.Right][3],
-			current_mouse_x,
-			current_mouse_y) < pan_dist_threshold) {
-				
-			on_view_context();
-		}
 		
 		return;
 	}
@@ -198,6 +190,7 @@ canvas_ensure_exists = function() {
 		return;
 	}
 	
+	canvas = surface_create(canvas_width, canvas_height);
 	buffer_set_surface(canvas_backup_buf, canvas, 0);
 }
 
@@ -278,8 +271,10 @@ canvas_replace = function(img) {
 	draw_sprite(img, 0, 0, 0);
 	surface_reset_target();
 	
-	canvas_backup();
+	canvas_create_backup();
 	bg_refresh();
+	
+	canvas_scale = min(window_width / canvas_width, window_height / canvas_height);
 }
 
 #endregion
@@ -346,13 +341,19 @@ on_window_resize = function(new_width, new_height) {
 /// called when the user hits load
 on_load_canvas = function() {
 	
-	var filepath = get_open_filename("*", "Canvas");
+	var filepath = get_open_filename("*", "");
 	
 	if (filepath == "") {
 		return;
 	}
 	
 	canvas_load_from_file(filepath);
+
+}
+
+/// called on pressing fullscreen key
+on_fullscreen_toggle = function() {
+	window_set_fullscreen(!window_get_fullscreen());
 }
 
 /// called on viewing the context menu
