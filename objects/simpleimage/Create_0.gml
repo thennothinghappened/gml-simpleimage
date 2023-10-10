@@ -200,7 +200,7 @@ canvas_pan_y = 0;
 canvas_scale = 1;
 
 /// surface id for the canvas
-canvas = -1;
+canvas = surface_create(canvas_width, canvas_height);
 
 /// backup buffer to reload canvas from if freed
 canvas_backup_buf = -1;
@@ -459,6 +459,7 @@ on_zoom = function(delta, window_center_x, window_center_y) {
 
 #region Final Init!
 
+canvas_backup_buf = buffer_create(surface_buffer_size(canvas_width, canvas_height), buffer_fixed, 1);
 on_file_picker();
 
 #endregion
