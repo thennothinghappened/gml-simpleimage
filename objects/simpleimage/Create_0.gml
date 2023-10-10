@@ -449,7 +449,7 @@ on_view_next = function(dir) {
 /// @param {real} window_center_x center x position in window space
 /// @param {real} window_center_y center y position in window space
 on_zoom = function(delta, window_center_x, window_center_y) {
-	static zoom_multiplier = 0.04;
+	static zoom_multiplier = 0.08;
 	var zoom_factor = delta * zoom_multiplier;
 	
 	canvas_zoom(zoom_factor, window_center_x, window_center_y);
