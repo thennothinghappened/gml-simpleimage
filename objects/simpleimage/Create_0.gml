@@ -35,6 +35,25 @@ file = undefined;
 dir_name = undefined;
 dir_list = undefined;
 
+/// load a given file passed in if so!
+if (parameter_count() >= 1) {
+	var exts = [".png", ".jpeg", ".jpg", ".gif"];
+	
+	for (var i = 0; i < parameter_count(); i ++) {
+		var str = parameter_string(i);
+		
+		if (!file_exists(str)) {
+			continue;
+		}
+		
+		if (!array_contains(exts, string_lower(filename_ext(str))) {
+			continue;
+		}
+		
+		file = str;
+	}
+}
+
 enum LoadDirListResult {
 	Success,
 	NoChange,
@@ -459,7 +478,13 @@ on_zoom = function(delta, window_center_x, window_center_y) {
 
 #region Final Init!
 
-canvas_backup_buf = buffer_create(surface_buffer_size(canvas_width, canvas_height), buffer_fixed, 1);
-on_file_picker();
+if (file == undefined) {
+
+	canvas_backup_buf = buffer_create(surface_buffer_size(canvas_width, canvas_height), buffer_fixed, 1);
+	on_file_picker();
+
+} else {
+	on_load_canvas(file);
+}
 
 #endregion
