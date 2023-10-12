@@ -277,7 +277,7 @@ canvas_load_from_file = function(filepath) {
 	var res = image_load(filepath);
 	file = filepath;
 	
-	if (res.result == ImageLoadResult.Loaded) {
+	if (res.status == ImageLoadResult.Success) {
 		img = res.img;
 	}
 	
@@ -295,7 +295,7 @@ canvas_load_from_file = function(filepath) {
 	canvas_scale = min(window_width / canvas_width, window_height / canvas_height);
 	canvas_center();
 	
-	return res.result;
+	return res.status;
 }
 
 /// center the canvas

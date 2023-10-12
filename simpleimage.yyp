@@ -12,6 +12,8 @@
   "defaultScriptType": 1,
   "Folders": [
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"util","folderPath":"folders/util.yy",},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"detectors","folderPath":"folders/detectors.yy",},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"parsers","folderPath":"folders/parsers.yy",},
   ],
   "IncludedFiles": [],
   "isEcma": false,

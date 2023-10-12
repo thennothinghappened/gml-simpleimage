@@ -1,6 +1,8 @@
 {
   "FolderOrderSettings": [
     {"name":"util","order":3,"path":"folders/util.yy",},
+    {"name":"detectors","order":6,"path":"folders/detectors.yy",},
+    {"name":"parsers","order":7,"path":"folders/parsers.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"fail_img","order":5,"path":"sprites/fail_img/fail_img.yy",},
