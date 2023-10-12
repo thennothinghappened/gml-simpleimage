@@ -2,8 +2,10 @@
 /// @param {string} err
 function render_error(err) {
 	
+	static fail_width = sprite_get_width(fail_img);
+	
 	static info = "Error reading file!";
-	static info_width = string_width(info);
+	static info_width = string_width(info) + fail_width;
 	static info_height = string_height(info);
 	
 	static padding = 16;
@@ -20,7 +22,8 @@ function render_error(err) {
 	
 		draw_rectangle(1, 1, width - 2, height - 2, true);
 	
-		draw_text(padding, padding, info);
+		draw_sprite(fail_img, 0, padding, padding);
+		draw_text(padding + fail_width, padding, info);
 		draw_line(padding, padding + info_height, padding + info_width, padding + info_height);
 	
 		draw_text(padding, padding + info_height, err);

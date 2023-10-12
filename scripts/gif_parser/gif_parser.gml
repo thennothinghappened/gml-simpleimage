@@ -49,6 +49,8 @@ function gif_parser(data) {
 		gct = gct_res.col_table;
 	}
 	
+	
+	
 	return {
 		status: ImageLoadResult.ParseFailed,
 		err: "GIF support isn't finished yet!"
@@ -125,9 +127,9 @@ function gif_parse_logical_screen_descriptor(b) {
 	}
 }
 
-/// parse a gif file's Global Colour Table
+/// parse a gif file's Colour Table
 /// @param {Id.Buffer} b
-/// @param {real} entries
+/// @param {real} entries number of entries in the table
 function gif_parse_colour_table(b, entries) {
 	
 	var bytesize = entries * 3;
