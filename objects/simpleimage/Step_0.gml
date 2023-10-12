@@ -1,11 +1,13 @@
 /// @desc 
 
 if (keyboard_check_pressed(ord("L"))) {
-	return on_file_picker();
+	on_file_picker();
+	return;
 }
 
 if (keyboard_check_pressed(ord("F"))) {
-	return on_fullscreen_toggle();
+	on_fullscreen_toggle();
+	return;
 }
 
 var arrow_horizontal = real(keyboard_check(vk_left)) - real(keyboard_check(vk_right));

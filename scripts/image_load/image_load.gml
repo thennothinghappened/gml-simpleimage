@@ -35,12 +35,9 @@ global.image_parsers[ImageFileType.JPG] = default_image_parser;
 global.image_parsers[ImageFileType.GIF] = default_image_parser;
 global.image_parsers[ImageFileType.BMP] = bmp_parser;
 
-/// Safe wrapper to add any given supported image!
-/// @param {string} url
-/// @returns { Struct { status: ImageLoadResult, img?: Asset.GMSprite } }
-function image_load(url) {
-	
-	var data = new ImageParseData(url);
+/// find a suitable parser for a given image url (or none)
+/// @param {Struct.ImageParseData} data
+function image_find_parser(data) {
 	var parser = undefined;
 	
 	for (var i = 0; i < array_length(global.image_detectors); i ++) {
@@ -57,19 +54,34 @@ function image_load(url) {
 			continue;
 		}
 		
-		parser = global.image_parsers[i];
-		break;
+		return {
+			status: ImageLoadResult.Success,
+			parser: global.image_parsers[i]
+		};
 	}
 	
-	if (parser == undefined) {
+	return {
+		status: ImageLoadResult.Unsupported
+	};
+}
+
+/// Safe wrapper to add any given supported image!
+/// @param {string} url
+/// @returns { Struct { status: ImageLoadResult, img?: Asset.GMSprite } }
+function image_load(url) {
+	
+	var data = new ImageParseData(url);
+	var parser_res = image_find_parser(data);
+	
+	if (parser_res.status != ImageLoadResult.Success) {
 		data.cleanup();
-		return { status: ImageLoadResult.Unsupported };
+		return parser_res;
 	}
 	
 	var res;
 	
 	try {
-		res = parser(data);
+		res = parser_res.parser(data);
 	} catch(err) {
 		data.cleanup();
 		

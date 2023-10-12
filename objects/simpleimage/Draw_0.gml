@@ -1,7 +1,7 @@
 /// @desc 
 
-var _window_width = window_get_width();
-var _window_height = window_get_height();
+var _window_width = max(window_get_width(), 1);
+var _window_height = max(window_get_height(), 1);
 
 if (window_width != _window_width || window_height != _window_height) {
     on_window_resize(_window_width, _window_height);

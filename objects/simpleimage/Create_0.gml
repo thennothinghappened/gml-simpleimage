@@ -36,16 +36,21 @@ dir_name = undefined;
 dir_list = undefined;
 
 /// load a given file passed in if so!
-if (parameter_count() >= 1) {
-	var exts = [".png", ".jpeg", ".jpg", ".gif"];
+if (parameter_count() >= 2) {
 	
-	for (var i = 0; i < parameter_count(); i ++) {
+	for (var i = 1; i < parameter_count(); i ++) {
 		var str = parameter_string(i);
 		
-		// we don't bother checking it exists for now as windows doesn't wanna play nice
-		// (and laziness, shh)
+		if (!file_exists(str)) {
+			continue;
+		}
 		
-		if (!array_contains(exts, string_lower(filename_ext(str)))) {
+		var data = new ImageParseData(str);
+		var res = image_find_parser(data);
+		
+		data.cleanup();
+		
+		if (res.status != ImageLoadResult.Success) {
 			continue;
 		}
 		
@@ -207,8 +212,8 @@ mouse_state_load = function() {
 
 #region Canvas setup and manipulation
 
-canvas_width = window_width;
-canvas_height = window_height;
+canvas_width = sprite_get_width(fail_img);
+canvas_height = sprite_get_height(fail_img);
 
 /// how much we've panned the canvas on screen!
 canvas_pan_x = 0;
@@ -293,7 +298,7 @@ canvas_load_from_file = function(filepath) {
 	
 	bg_refresh();
 	
-	canvas_scale = min(window_width / canvas_width, window_height / canvas_height);
+	canvas_rescale();
 	canvas_center();
 	
 	return res.status;
@@ -303,6 +308,11 @@ canvas_load_from_file = function(filepath) {
 canvas_center = function() {
 	canvas_pan_x = (window_width / 2) - (canvas_width / 2 * canvas_scale);
 	canvas_pan_y = (window_height / 2) - (canvas_height / 2 * canvas_scale);
+}
+
+/// scale the canvas to fit the screen
+canvas_rescale = function() {
+	canvas_scale = min(window_width / canvas_width, window_height / canvas_height);
 }
 
 #endregion
@@ -382,7 +392,7 @@ on_load_canvas = function(filepath) {
 
 /// called when the user hits load
 on_file_picker = function() {
-	
+	show_message("hiii")
 	var filepath = get_open_filename("*", "");
 	
 	if (filepath == "") {
@@ -441,13 +451,13 @@ on_zoom = function(delta, window_center_x, window_center_y) {
 
 #region Final Init!
 
+canvas_rescale();
+canvas_center();
+
 if (file == undefined) {
-
-	canvas_backup_buf = buffer_create(surface_buffer_size(canvas_width, canvas_height), buffer_fixed, 1);
-	on_file_picker();
-
-} else {
-	on_load_canvas(file);
+	return on_file_picker();
 }
+
+on_load_canvas(file);
 
 #endregion
