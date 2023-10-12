@@ -392,7 +392,7 @@ on_load_canvas = function(filepath) {
 
 /// called when the user hits load
 on_file_picker = function() {
-	show_message("hiii")
+	
 	var filepath = get_open_filename("*", "");
 	
 	if (filepath == "") {
@@ -455,7 +455,8 @@ canvas_rescale();
 canvas_center();
 
 if (file == undefined) {
-	return on_file_picker();
+	on_file_picker();
+	return;
 }
 
 on_load_canvas(file);
