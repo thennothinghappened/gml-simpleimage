@@ -22,44 +22,17 @@ function ImageParseData(url) constructor {
 
 /// list of detectors for given known filetypes
 global.image_detectors = [];
-global.image_detectors[ImageFileType.PNG] = function(data) {
-	return { status: ImageLoadResult.InvalidImage };
-};
+global.image_detectors[ImageFileType.PNG] = png_detector;
+global.image_detectors[ImageFileType.JPG] = jpg_detector;
+global.image_detectors[ImageFileType.GIF] = gif_detector;
+global.image_detectors[ImageFileType.BMP] = bmp_detector;
 
 /// list of parsers for given known filetypes
 global.image_parsers = [];
-global.image_parsers[ImageFileType.PNG] = default_image_load;
-global.image_parsers[ImageFileType.JPG] = default_image_load;
-
-/// find the image parser for a given image
-function image_find_parser(data) {
-	
-	
-}
-
-/// load an image using the default GM loading method (sprite_add)
-/// @param {Struct.ImageParseData} data
-function default_image_load(data) {
-	try {
-		var img = sprite_add(data.url, 1, false, false, 0, 0);
-		
-		if (!sprite_exists(img)) {
-			throw "Failed to load sprite";
-		}
-		
-		return {
-			status: ImageLoadResult.Success,
-			img: img
-		};
-		
-	} catch (e) {
-		
-		return {
-			status: ImageLoadResult.InvalidImage,
-			img: undefined
-		};
-	}
-}
+global.image_parsers[ImageFileType.PNG] = default_image_parser;
+global.image_parsers[ImageFileType.JPG] = default_image_parser;
+global.image_parsers[ImageFileType.GIF] = default_image_parser;
+global.image_parsers[ImageFileType.BMP] = bmp_parser;
 
 /// Safe wrapper to add any given supported image!
 /// @param {string} url
@@ -78,16 +51,17 @@ function image_load(url) {
 		
 		var res = detector(data);
 		
-		if (res.status != ImageLoadResult.Success) {
+		if (res != ImageLoadResult.Success) {
 			buffer_seek(data.buf, buffer_seek_start, 0);
 			continue;
 		}
 		
-		parser = res.parser;
+		parser = global.image_parsers[i];
 		break;
 	}
 	
 	if (parser == undefined) {
+		data.cleanup();
 		return { status: ImageLoadResult.Unsupported };
 	}
 	
