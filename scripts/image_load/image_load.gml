@@ -1,7 +1,8 @@
 enum ImageLoadResult {
 	Success,
 	InvalidImage,
-	Unsupported
+	Unsupported,
+	ParseFailed
 }
 
 enum ImageFileType {
@@ -65,11 +66,23 @@ function image_load(url) {
 		return { status: ImageLoadResult.Unsupported };
 	}
 	
-	var res = parser(data);
+	var res;
+	
+	try {
+		res = parser(data);
+	} catch(err) {
+		data.cleanup();
+		
+		return {
+			status: ImageLoadResult.ParseFailed,
+			err: err
+		};
+	}
+	
 	data.cleanup();
 	
 	if (res.status != ImageLoadResult.Success) {
-		return { status: ImageLoadResult.InvalidImage };
+		return res;
 	}
 	
 	return {

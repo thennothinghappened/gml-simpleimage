@@ -13,11 +13,11 @@ function default_image_parser(data) {
 			img: img
 		};
 		
-	} catch (e) {
+	} catch (err) {
 		
 		return {
-			status: ImageLoadResult.InvalidImage,
-			img: undefined
+			status: ImageLoadResult.ParseFailed,
+			err: err
 		};
 	}
 }

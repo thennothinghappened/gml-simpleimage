@@ -279,6 +279,8 @@ canvas_load_from_file = function(filepath) {
 	
 	if (res.status == ImageLoadResult.Success) {
 		img = res.img;
+	} else {
+		show_message($"(temp) failure: {res}");
 	}
 	
 	if (sprite_exists(canvas) && canvas != fail_img) {

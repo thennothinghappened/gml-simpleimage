@@ -14,6 +14,7 @@
     {"name":"gif_detector","order":2,"path":"scripts/gif_detector/gif_detector.yy",},
     {"name":"image_load","order":1,"path":"scripts/image_load/image_load.yy",},
     {"name":"bmp_parser","order":1,"path":"scripts/bmp_parser/bmp_parser.yy",},
+    {"name":"buffer_write_back","order":4,"path":"scripts/buffer_write_back/buffer_write_back.yy",},
     {"name":"bg","order":4,"path":"sprites/bg/bg.yy",},
     {"name":"RmContainer","order":1,"path":"rooms/RmContainer/RmContainer.yy",},
   ],
