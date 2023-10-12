@@ -5,6 +5,7 @@
     {"name":"parsers","order":7,"path":"folders/parsers.yy",},
   ],
   "ResourceOrderSettings": [
+    {"name":"modwrap","order":5,"path":"scripts/modwrap/modwrap.yy",},
     {"name":"fail_img","order":5,"path":"sprites/fail_img/fail_img.yy",},
     {"name":"magic_detector","order":2,"path":"scripts/magic_detector/magic_detector.yy",},
     {"name":"jpg_detector","order":1,"path":"scripts/jpg_detector/jpg_detector.yy",},

@@ -46,6 +46,9 @@ if (parameter_count() >= 2) {
 	
 	for (var i = 1; i < parameter_count(); i ++) {
 		var str = parameter_string(i);
+		var _dir_name = filename_path(str);
+		
+		get_open_filename("aaaaaa", _dir_name);
 		
 		if (!file_exists(str)) {
 			continue;
@@ -440,11 +443,7 @@ on_view_next = function(dir) {
 		return;
 	}
 	
-	var ind = array_get_index(dir_list, file) + dir;
-	
-	if (ind < 0 || ind >= array_length(dir_list)) {
-		return;
-	}
+	var ind = modwrap((array_get_index(dir_list, file) + dir), array_length(dir_list));
 	
 	on_load_canvas(dir_list[ind]);
 }

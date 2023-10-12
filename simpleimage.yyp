@@ -22,6 +22,7 @@
     "IDEVersion": "2023.8.2.106",
   },
   "resources": [
+    {"id":{"name":"modwrap","path":"scripts/modwrap/modwrap.yy",},},
     {"id":{"name":"fail_img","path":"sprites/fail_img/fail_img.yy",},},
     {"id":{"name":"magic_detector","path":"scripts/magic_detector/magic_detector.yy",},},
     {"id":{"name":"png_detector","path":"scripts/png_detector/png_detector.yy",},},
