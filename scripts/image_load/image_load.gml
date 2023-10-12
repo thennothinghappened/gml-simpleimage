@@ -1,8 +1,12 @@
+/// How many bytes we'll reserve at least to read magic of a file
+#macro PARSER_MAGIC_RESERVED 16
+
 enum ImageLoadResult {
 	Success,
 	InvalidImage,
 	Unsupported,
-	ParseFailed
+	ParseFailed,
+	FileReadFailed
 }
 
 enum ImageFileType {
@@ -36,8 +40,32 @@ global.image_parsers[ImageFileType.GIF] = gif_parser;
 global.image_parsers[ImageFileType.BMP] = bmp_parser;
 
 /// find a suitable parser for a given image url (or none)
-/// @param {Struct.ImageParseData} data
-function image_find_parser(data) {
+function image_url_find_parser(url) {
+	var buf = buffer_create(PARSER_MAGIC_RESERVED, buffer_fixed, 1);
+			
+	try {
+		
+		buffer_load_partial(buf, url, 0, PARSER_MAGIC_RESERVED, 0);
+		
+	} catch (err) {
+		
+		buffer_delete(buf);
+		
+		return {
+			status: ImageLoadResult.FileReadFailed,
+			err: "Failed to load the file buffer to read magic!"
+		};
+	}
+	
+	var res = image_find_parser(buf);
+	buffer_delete(buf);
+	
+	return res;
+}
+
+/// find a suitable parser for a given image buffer
+/// @param {Id.Buffer} buf
+function image_find_parser(buf) {
 	var parser = undefined;
 	
 	for (var i = 0; i < array_length(global.image_detectors); i ++) {
@@ -47,10 +75,10 @@ function image_find_parser(data) {
 			continue;
 		}
 		
-		var res = detector(data);
+		var res = detector(buf);
 		
 		if (res != ImageLoadResult.Success) {
-			buffer_seek(data.buf, buffer_seek_start, 0);
+			buffer_seek(buf, buffer_seek_start, 0);
 			continue;
 		}
 		
@@ -61,7 +89,8 @@ function image_find_parser(data) {
 	}
 	
 	return {
-		status: ImageLoadResult.Unsupported
+		status: ImageLoadResult.Unsupported,
+		err: "Found no suitable parser for this filetype"
 	};
 }
 
@@ -71,7 +100,14 @@ function image_find_parser(data) {
 function image_load(url) {
 	
 	var data = new ImageParseData(url);
-	var parser_res = image_find_parser(data);
+	if (!buffer_exists(data.buf)) {
+		return {
+			status: ImageLoadResult.FileReadFailed,
+			err: "Failed to load the file buffer!"
+		};
+	}
+	
+	var parser_res = image_find_parser(data.buf);
 	
 	if (parser_res.status != ImageLoadResult.Success) {
 		data.cleanup();
@@ -81,8 +117,11 @@ function image_load(url) {
 	var res;
 	
 	try {
+		
 		res = parser_res.parser(data);
+		
 	} catch(err) {
+		
 		data.cleanup();
 		
 		return {

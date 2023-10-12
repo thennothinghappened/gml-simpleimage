@@ -3,7 +3,6 @@
     {"name":"util","order":3,"path":"folders/util.yy",},
     {"name":"detectors","order":6,"path":"folders/detectors.yy",},
     {"name":"parsers","order":7,"path":"folders/parsers.yy",},
-    {"name":"includes","order":5,"path":"folders/util/includes.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"fail_img","order":5,"path":"sprites/fail_img/fail_img.yy",},
@@ -17,6 +16,7 @@
     {"name":"bmp_parser","order":1,"path":"scripts/bmp_parser/bmp_parser.yy",},
     {"name":"bg","order":4,"path":"sprites/bg/bg.yy",},
     {"name":"gif_parser","order":2,"path":"scripts/gif_parser/gif_parser.yy",},
+    {"name":"render_error","order":4,"path":"scripts/render_error/render_error.yy",},
     {"name":"RmContainer","order":1,"path":"rooms/RmContainer/RmContainer.yy",},
   ],
 }

@@ -3,6 +3,12 @@
 #macro X 0
 #macro Y 1
 
+SLASH = "/";
+
+if (os_type == os_windows) {
+	SLASH = @'\';
+}
+
 #region Initial window setup
 
 application_surface_enable(false);
@@ -45,10 +51,7 @@ if (parameter_count() >= 2) {
 			continue;
 		}
 		
-		var data = new ImageParseData(str);
-		var res = image_find_parser(data);
-		
-		data.cleanup();
+		var res = image_url_find_parser(str);
 		
 		if (res.status != ImageLoadResult.Success) {
 			continue;
@@ -79,10 +82,20 @@ load_dir_list = function(filepath, force = false) {
 	dir_name = new_dir_name;
 	dir_list = [];
 	
-	var file = file_find_first($"{new_dir_name}/*.*", fa_none);
+	var file = file_find_first($"{new_dir_name}{SLASH}*.*", fa_none);
 	
 	while (file != "") {
-		array_push(dir_list, file);
+		var inner_filepath = $"{new_dir_name}{SLASH}{file}";
+		
+		if (file_exists(inner_filepath)) {
+			
+			var res = image_url_find_parser(inner_filepath);
+			
+			if (res.status == ImageLoadResult.Success) {
+				array_push(dir_list, inner_filepath);
+			}
+		}
+		
 		file = file_find_next();
 	}
 	
@@ -232,7 +245,7 @@ canvas = fail_img;
 canvas_zoom = function(scale_factor, window_center_x, window_center_y) {
 	
 	static min_zoom = 0.01;
-	static max_zoom = 100;
+	static max_zoom = 1000;
 	
 	// see: https://stackoverflow.com/questions/19999694/how-to-scale-about-point
 	
@@ -284,7 +297,7 @@ canvas_load_from_file = function(filepath) {
 	if (res.status == ImageLoadResult.Success) {
 		img = res.img;
 	} else {
-		show_message($"(temp) failure: {res}");
+		img = render_error(res.err);
 	}
 	
 	if (sprite_exists(canvas) && canvas != fail_img) {
@@ -427,13 +440,13 @@ on_view_next = function(dir) {
 		return;
 	}
 	
-	var ind = array_get_index(dir_list, filename_name(file)) + dir;
+	var ind = array_get_index(dir_list, file) + dir;
 	
 	if (ind < 0 || ind >= array_length(dir_list)) {
 		return;
 	}
 	
-	on_load_canvas($"{filename_dir(file)}/{dir_list[ind]}");
+	on_load_canvas(dir_list[ind]);
 }
 
 /// called on zooming in and out on the canvas

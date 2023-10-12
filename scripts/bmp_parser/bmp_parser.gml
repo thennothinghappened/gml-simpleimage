@@ -1,9 +1,13 @@
+//////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                      //
+// parser based on the documentation at https://paulbourke.net/dataformats/bmp, thanks! //
+//                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////
+
 /// load an image as a BMP
 /// @param {Struct.ImageParseData} data
 function bmp_parser(data) {
 	var b = data.buf;
-	
-	// parser based on the documentation at https://paulbourke.net/dataformats/bmp, thanks!
 	
 	buffer_seek(b, buffer_seek_start, 0);
 	
