@@ -218,36 +218,8 @@ canvas_pan_y = 0;
 /// how much we've zoomed the canvas!
 canvas_scale = 1;
 
-/// surface id for the canvas
-canvas = surface_create(canvas_width, canvas_height);
-
-/// backup buffer to reload canvas from if freed
-canvas_backup_buf = -1;
-
-/// create the backup buffer for the canvas
-canvas_create_backup = function() {
-	if (buffer_exists(canvas_backup_buf)) {
-		buffer_delete(canvas_backup_buf);
-	}
-	
-	canvas_backup_buf = buffer_create(surface_buffer_size(canvas_width, canvas_height), buffer_fixed, 1);
-	canvas_backup();
-}
-
-/// backup the surface into memory
-canvas_backup = function() {
-	buffer_get_surface(canvas_backup_buf, canvas, 0);
-}
-
-/// make sure the canvas exists. if not, restore from the backup
-canvas_ensure_exists = function() {
-	if (surface_exists(canvas)) {
-		return;
-	}
-	
-	canvas = surface_create(canvas_width, canvas_height);
-	buffer_set_surface(canvas_backup_buf, canvas, 0);
-}
+/// sprite id for the canvas
+canvas = fail_img;
 
 /// zoom in or out of the canvas around a point in window space
 /// @param {real} scale_factor
@@ -300,40 +272,30 @@ point_from_canvas = function(x, y) {
 /// @returns {Enum.ImageLoadResult}
 canvas_load_from_file = function(filepath) {
 	
+	var img = fail_img;
+	
 	var res = image_load(filepath);
 	file = filepath;
 	
 	if (res.result == ImageLoadResult.Loaded) {
-		
-		canvas_replace(res.img);
-		sprite_delete(res.img);
-		
-		return res.result;
+		img = res.img;
 	}
 	
-	canvas_replace(fail_img);
+	if (sprite_exists(canvas) && canvas != fail_img) {
+		sprite_delete(canvas);
+	}
 	
-	return res.result;
-}
-
-/// replace the canvas with a new image! (i.e. load a new img)
-/// @param {Asset.GMSprite} img
-canvas_replace = function(img) {
 	canvas_width = sprite_get_width(img);
 	canvas_height = sprite_get_height(img);
 	
-	surface_free(canvas);
-	canvas = surface_create(canvas_width, canvas_height);
+	canvas = img;
 	
-	surface_set_target(canvas);
-	draw_sprite(img, 0, 0, 0);
-	surface_reset_target();
-	
-	canvas_create_backup();
 	bg_refresh();
 	
 	canvas_scale = min(window_width / canvas_width, window_height / canvas_height);
 	canvas_center();
+	
+	return res.result;
 }
 
 /// center the canvas

@@ -8,7 +8,7 @@ enum ImageLoadResult {
 /// @returns { Struct { result: ImageLoadResult, img: Asset.GMSprite } }
 function image_load(url) {
 	try {
-		var img = sprite_add(url, 0, false, false, 0, 0);
+		var img = sprite_add(url, 1, false, false, 0, 0);
 		if (!sprite_exists(img)) {
 			throw "Failed to load sprite";
 		}
