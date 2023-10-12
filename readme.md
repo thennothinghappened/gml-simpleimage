@@ -16,5 +16,12 @@ for viewing instead, so here we go!
 | Arrows      | Pan (keyboard)|
 | Shift+Arrows| Prev/Next img|
 
-*Mouse wheel speed is set to work well on a trackpad. I'll add some settings later,
+\*Mouse wheel speed is set to work well on a trackpad. I'll add some settings later,
 maybe.
+
+## Formats
+Current file format support:
+ - [x] `png`
+ - [x] `jpg`/`jpeg`
+ - [x] `gif` \*currently via `sprite_add()`, so no animation support yet.
+ - [ ] `bmp`
