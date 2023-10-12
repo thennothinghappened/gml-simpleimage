@@ -14,6 +14,7 @@
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"util","folderPath":"folders/util.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"detectors","folderPath":"folders/detectors.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"parsers","folderPath":"folders/parsers.yy",},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"includes","folderPath":"folders/util/includes.yy",},
   ],
   "IncludedFiles": [],
   "isEcma": false,
@@ -35,6 +36,8 @@
     {"id":{"name":"bmp_parser","path":"scripts/bmp_parser/bmp_parser.yy",},},
     {"id":{"name":"default_image_parser","path":"scripts/default_image_parser/default_image_parser.yy",},},
     {"id":{"name":"bg","path":"sprites/bg/bg.yy",},},
+    {"id":{"name":"gif_parser","path":"scripts/gif_parser/gif_parser.yy",},},
+    {"id":{"name":"GifHx","path":"scripts/GifHx/GifHx.yy",},},
     {"id":{"name":"RmContainer","path":"rooms/RmContainer/RmContainer.yy",},},
   ],
   "RoomOrderNodes": [

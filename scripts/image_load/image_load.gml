@@ -32,7 +32,7 @@ global.image_detectors[ImageFileType.BMP] = bmp_detector;
 global.image_parsers = [];
 global.image_parsers[ImageFileType.PNG] = default_image_parser;
 global.image_parsers[ImageFileType.JPG] = default_image_parser;
-global.image_parsers[ImageFileType.GIF] = default_image_parser;
+global.image_parsers[ImageFileType.GIF] = gif_parser;
 global.image_parsers[ImageFileType.BMP] = bmp_parser;
 
 /// find a suitable parser for a given image url (or none)
