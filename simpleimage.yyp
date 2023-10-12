@@ -17,7 +17,7 @@
   "isEcma": false,
   "LibraryEmitters": [],
   "MetaData": {
-    "IDEVersion": "2023.8.1.102",
+    "IDEVersion": "2023.8.2.106",
   },
   "resources": [
     {"id":{"name":"fail_img","path":"sprites/fail_img/fail_img.yy",},},

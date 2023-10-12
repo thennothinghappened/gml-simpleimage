@@ -276,7 +276,7 @@ canvas_translate = function(x, y) {
 /// convert a point in window space to a point in canvas space!
 /// @param {real} x
 /// @param {real} y
-/// @returns {real[]}
+/// @returns {array<real>}
 point_to_canvas = function(x, y) {
 	return [
 		(x - canvas_pan_x) / canvas_scale,
@@ -287,7 +287,7 @@ point_to_canvas = function(x, y) {
 /// convert a point in canvas space back to window space!
 /// @param {real} x
 /// @param {real} y
-/// @returns {real[]}
+/// @returns {array<real>}
 point_from_canvas = function(x, y) {
 	return [
 		(x * canvas_scale) + canvas_pan_x,
@@ -398,8 +398,8 @@ gui_ensure_exists = function() {
 #region Event handlers
 
 /// called upon window resize.
-/// @param {number} new_width
-/// @param {number} new_height
+/// @param {real} new_width
+/// @param {real} new_height
 on_window_resize = function(new_width, new_height) {
     window_width = new_width;
     window_height = new_height;
