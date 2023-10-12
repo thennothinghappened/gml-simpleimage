@@ -23,5 +23,5 @@ maybe.
 Current file format support:
  - [x] `png`
  - [x] `jpg`/`jpeg`
- - [x] `gif` \*currently via `sprite_add()`, so no animation support yet.
+ - [x] `gif` - WIP parser for animation support :)
  - [x] `bmp` \*currently supports only 24-bit colour BMPs
