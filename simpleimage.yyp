@@ -34,7 +34,6 @@
     {"id":{"name":"image_load","path":"scripts/image_load/image_load.yy",},},
     {"id":{"name":"bmp_parser","path":"scripts/bmp_parser/bmp_parser.yy",},},
     {"id":{"name":"default_image_parser","path":"scripts/default_image_parser/default_image_parser.yy",},},
-    {"id":{"name":"buffer_write_back","path":"scripts/buffer_write_back/buffer_write_back.yy",},},
     {"id":{"name":"bg","path":"sprites/bg/bg.yy",},},
     {"id":{"name":"RmContainer","path":"rooms/RmContainer/RmContainer.yy",},},
   ],
