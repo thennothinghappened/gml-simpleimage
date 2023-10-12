@@ -42,9 +42,8 @@ if (parameter_count() >= 1) {
 	for (var i = 0; i < parameter_count(); i ++) {
 		var str = parameter_string(i);
 		
-		if (!file_exists(str)) {
-			continue;
-		}
+		// we don't bother checking it exists for now as windows doesn't wanna play nice
+		// (and laziness, shh)
 		
 		if (!array_contains(exts, string_lower(filename_ext(str)))) {
 			continue;
