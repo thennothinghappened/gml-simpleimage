@@ -48,8 +48,6 @@ if (parameter_count() >= 2) {
 		var str = parameter_string(i);
 		var _dir_name = filename_path(str);
 		
-		get_open_filename("aaaaaa", _dir_name);
-		
 		if (!file_exists(str)) {
 			continue;
 		}
