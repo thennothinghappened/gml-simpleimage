@@ -33,14 +33,14 @@ function bmp_parser(data) {
 	
 	if (ih_compression != 0) {
 		return {
-			status: ImageLoadResult.Unsupported,
+			status: LoadResult.Unsupported,
 			err: "BMP Compression not implemented!"
 		};
 	}
 	
 	if (ih_bits != 24) {
 		return {
-			status: ImageLoadResult.Unsupported,
+			status: LoadResult.Unsupported,
 			err: $"BMP bits {ih_bits} not implemented!"
 		};
 	}
@@ -81,7 +81,7 @@ function bmp_parser(data) {
 	surface_free(surf);
 	
 	return {
-		status: ImageLoadResult.Success,
+		status: LoadResult.Success,
 		img: spr
 	};
 }

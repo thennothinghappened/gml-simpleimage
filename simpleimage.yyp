@@ -11,15 +11,15 @@
   },
   "defaultScriptType": 1,
   "Folders": [
-    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"util","folderPath":"folders/util.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"detectors","folderPath":"folders/detectors.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"parsers","folderPath":"folders/parsers.yy",},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"util","folderPath":"folders/util.yy",},
   ],
   "IncludedFiles": [],
   "isEcma": false,
   "LibraryEmitters": [],
   "MetaData": {
-    "IDEVersion": "2023.8.2.106",
+    "IDEVersion": "2023.8.1.102",
   },
   "resources": [
     {"id":{"name":"modwrap","path":"scripts/modwrap/modwrap.yy",},},

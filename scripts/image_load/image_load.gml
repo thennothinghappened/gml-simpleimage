@@ -1,12 +1,13 @@
 /// How many bytes we'll reserve at least to read magic of a file
 #macro PARSER_MAGIC_RESERVED 16
 
-enum ImageLoadResult {
+enum LoadResult {
 	Success,
-	InvalidImage,
+	Invalid,
 	Unsupported,
 	ParseFailed,
-	FileReadFailed
+	FileReadFailed,
+	Cancelled
 }
 
 enum ImageFileType {
@@ -52,7 +53,7 @@ function image_url_find_parser(url) {
 		buffer_delete(buf);
 		
 		return {
-			status: ImageLoadResult.FileReadFailed,
+			status: LoadResult.FileReadFailed,
 			err: "Failed to load the file buffer to read magic!"
 		};
 	}
@@ -77,39 +78,39 @@ function image_find_parser(buf) {
 		
 		var res = detector(buf);
 		
-		if (res != ImageLoadResult.Success) {
+		if (res != LoadResult.Success) {
 			buffer_seek(buf, buffer_seek_start, 0);
 			continue;
 		}
 		
 		return {
-			status: ImageLoadResult.Success,
+			status: LoadResult.Success,
 			parser: global.image_parsers[i]
 		};
 	}
 	
 	return {
-		status: ImageLoadResult.Unsupported,
+		status: LoadResult.Unsupported,
 		err: "Found no suitable parser for this filetype"
 	};
 }
 
 /// Safe wrapper to add any given supported image!
 /// @param {string} url
-/// @returns { Struct { status: ImageLoadResult, img?: Asset.GMSprite } }
+/// @returns { Struct { status: LoadResult, img?: Asset.GMSprite } }
 function image_load(url) {
 	
 	var data = new ImageParseData(url);
 	if (!buffer_exists(data.buf)) {
 		return {
-			status: ImageLoadResult.FileReadFailed,
+			status: LoadResult.FileReadFailed,
 			err: "Failed to load the file buffer!"
 		};
 	}
 	
 	var parser_res = image_find_parser(data.buf);
 	
-	if (parser_res.status != ImageLoadResult.Success) {
+	if (parser_res.status != LoadResult.Success) {
 		data.cleanup();
 		return parser_res;
 	}
@@ -125,19 +126,19 @@ function image_load(url) {
 		data.cleanup();
 		
 		return {
-			status: ImageLoadResult.ParseFailed,
+			status: LoadResult.ParseFailed,
 			err: err
 		};
 	}
 	
 	data.cleanup();
 	
-	if (res.status != ImageLoadResult.Success) {
+	if (res.status != LoadResult.Success) {
 		return res;
 	}
 	
 	return {
-		status: ImageLoadResult.Success,
+		status: LoadResult.Success,
 		img: res.img
 	};
 }

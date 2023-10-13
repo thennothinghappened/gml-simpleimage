@@ -3,6 +3,9 @@
 #macro X 0
 #macro Y 1
 
+#macro BUFFER_ASYNC_MAX_SIZE 1073741824
+#macro BUFFER_ASYNC_DEF_SIZE 1024
+
 SLASH = "/";
 
 if (os_type == os_windows) {
@@ -25,7 +28,13 @@ draw_fps = 240;
 
 #endregion
 
-#region State
+#region Image State
+
+
+
+#endregion
+
+#region Movement State
 
 enum State {
 	Idle,
@@ -35,75 +44,6 @@ enum State {
 
 /// What we're currently doing!
 state = State.Idle;
-
-/// the file we're currently viewing
-file = undefined;
-dir_name = undefined;
-dir_list = undefined;
-
-/// load a given file passed in if so!
-if (parameter_count() >= 2) {
-	
-	for (var i = 1; i < parameter_count(); i ++) {
-		var str = parameter_string(i);
-		var _dir_name = filename_path(str);
-		
-		if (!file_exists(str)) {
-			continue;
-		}
-		
-		var res = image_url_find_parser(str);
-		
-		if (res.status != ImageLoadResult.Success) {
-			continue;
-		}
-		
-		file = str;
-	}
-}
-
-enum LoadDirListResult {
-	Success,
-	NoChange,
-	NonExistentError
-}
-
-/// load the directory listing for a given filepath, if changed.
-load_dir_list = function(filepath, force = false) {
-	var new_dir_name = filename_dir(filepath);
-	
-	if (new_dir_name == dir_name && !force) {
-		return LoadDirListResult.NoChange;
-	}
-	
-	if (!directory_exists(new_dir_name)) {
-		return LoadDirListResult.NonExistentError;
-	}
-	
-	dir_name = new_dir_name;
-	dir_list = [];
-	
-	var file = file_find_first($"{new_dir_name}{SLASH}*.*", fa_none);
-	
-	while (file != "") {
-		var inner_filepath = $"{new_dir_name}{SLASH}{file}";
-		
-		if (file_exists(inner_filepath)) {
-			
-			var res = image_url_find_parser(inner_filepath);
-			
-			if (res.status == ImageLoadResult.Success) {
-				array_push(dir_list, inner_filepath);
-			}
-		}
-		
-		file = file_find_next();
-	}
-	
-	file_find_close();
-	
-	return LoadDirListResult.Success;
-}
 
 handlers = [];
 
@@ -285,39 +225,6 @@ point_from_canvas = function(x, y) {
 	];
 }
 
-/// load the canvas from a file!
-/// @param {string} filepath
-/// @returns {Enum.ImageLoadResult}
-canvas_load_from_file = function(filepath) {
-	
-	var img = fail_img;
-	
-	var res = image_load(filepath);
-	file = filepath;
-	
-	if (res.status == ImageLoadResult.Success) {
-		img = res.img;
-	} else {
-		img = render_error(res.err);
-	}
-	
-	if (sprite_exists(canvas) && canvas != fail_img) {
-		sprite_delete(canvas);
-	}
-	
-	canvas_width = sprite_get_width(img);
-	canvas_height = sprite_get_height(img);
-	
-	canvas = img;
-	
-	bg_refresh();
-	
-	canvas_rescale();
-	canvas_center();
-	
-	return res.status;
-}
-
 /// center the canvas
 canvas_center = function() {
 	canvas_pan_x = (window_width / 2) - (canvas_width / 2 * canvas_scale);
@@ -394,29 +301,6 @@ on_window_resize = function(new_width, new_height) {
 	surface_free(gui_surface);
 }
 
-/// called when the user loads a file
-on_load_canvas = function(filepath) {
-	
-	gui_redraw = true;
-	
-	load_dir_list(filepath);
-	canvas_load_from_file(filepath);
-
-}
-
-/// called when the user hits load
-on_file_picker = function() {
-	
-	var filepath = get_open_filename("*", "");
-	
-	if (filepath == "") {
-		return;
-	}
-	
-	on_load_canvas(filepath);
-
-}
-
 /// called on pressing fullscreen key
 on_fullscreen_toggle = function() {
 	window_set_fullscreen(!window_get_fullscreen());
@@ -435,17 +319,6 @@ on_arrow_pan = function(xdir, ydir) {
 	canvas_translate(xdir * pan_speed, ydir * pan_speed);
 }
 
-/// called on viewing the next or previous image in the folder
-on_view_next = function(dir) {
-	if (file == undefined || dir_list == undefined) {
-		return;
-	}
-	
-	var ind = modwrap((array_get_index(dir_list, file) + dir), array_length(dir_list));
-	
-	on_load_canvas(dir_list[ind]);
-}
-
 /// called on zooming in and out on the canvas
 /// @param {real} delta
 /// @param {real} window_center_x center x position in window space
@@ -461,14 +334,5 @@ on_zoom = function(delta, window_center_x, window_center_y) {
 
 #region Final Init!
 
-canvas_rescale();
-canvas_center();
-
-if (file == undefined) {
-	on_file_picker();
-	return;
-}
-
-on_load_canvas(file);
 
 #endregion

@@ -15,7 +15,7 @@ function gif_parser(data) {
 	var header_res = gif_parse_header(b);
 	var header;
 	
-	if (header_res.status != ImageLoadResult.Success) {
+	if (header_res.status != LoadResult.Success) {
 		return header_res;
 	}
 	
@@ -23,7 +23,7 @@ function gif_parser(data) {
 	
 	if (header.version != "89a") {
 		return {
-			status: ImageLoadResult.Unsupported,
+			status: LoadResult.Unsupported,
 			err: $"GIF version {header.version} is not currently supported"
 		};
 	}
@@ -31,7 +31,7 @@ function gif_parser(data) {
 	var lsd_res = gif_parse_logical_screen_descriptor(b);
 	var lsd;
 	
-	if (lsd_res.status != ImageLoadResult.Success) {
+	if (lsd_res.status != LoadResult.Success) {
 		return lsd_res;
 	}
 	
@@ -42,7 +42,7 @@ function gif_parser(data) {
 	if (lsd.gct_enabled) {
 		var gct_res = gif_parse_colour_table(b, lsd.gct_entries);
 		
-		if (gct_res.status != ImageLoadResult.Success) {
+		if (gct_res.status != LoadResult.Success) {
 			return gct_res;
 		}
 		
@@ -52,7 +52,7 @@ function gif_parser(data) {
 	
 	
 	return {
-		status: ImageLoadResult.ParseFailed,
+		status: LoadResult.ParseFailed,
 		err: "GIF support isn't finished yet!"
 	};
 }
@@ -73,7 +73,7 @@ function gif_parse_header(b) {
 		version				+= chr(buffer_read(b, buffer_u8));
 		
 		return {
-			status: ImageLoadResult.Success,
+			status: LoadResult.Success,
 			header: {
 				version: version
 			}
@@ -81,7 +81,7 @@ function gif_parse_header(b) {
 	
 	} catch (err) {
 		return {
-			status: ImageLoadResult.ParseFailed,
+			status: LoadResult.ParseFailed,
 			err: err
 		};
 	}
@@ -106,7 +106,7 @@ function gif_parse_logical_screen_descriptor(b) {
 		var lsd_aspectratio	= buffer_read(b, buffer_u8);
 	
 		return {
-			status: ImageLoadResult.Success,
+			status: LoadResult.Success,
 			lsd: {
 				width:							lsd_width,
 				height:							lsd_height,
@@ -121,7 +121,7 @@ function gif_parse_logical_screen_descriptor(b) {
 	
 	} catch (err) {
 		return {
-			status: ImageLoadResult.ParseFailed,
+			status: LoadResult.ParseFailed,
 			err: err
 		};
 	}
@@ -144,13 +144,13 @@ function gif_parse_colour_table(b, entries) {
 		buffer_delete(ct);
 		
 		return {
-			status: ImageLoadResult.ParseFailed,
+			status: LoadResult.ParseFailed,
 			err: err
 		};
 	}
 	
 	return {
-		status: ImageLoadResult.Success,
+		status: LoadResult.Success,
 		col_table: ct
 	};
 }

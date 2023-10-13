@@ -9,14 +9,14 @@ function default_image_parser(data) {
 		}
 		
 		return {
-			status: ImageLoadResult.Success,
+			status: LoadResult.Success,
 			img: img
 		};
 		
 	} catch (err) {
 		
 		return {
-			status: ImageLoadResult.ParseFailed,
+			status: LoadResult.ParseFailed,
 			err: err
 		};
 	}
