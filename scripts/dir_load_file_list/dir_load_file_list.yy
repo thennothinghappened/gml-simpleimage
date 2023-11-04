@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "magic_list_detector",
+  "name": "dir_load_file_list",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "detectors",
-    "path": "folders/detectors.yy",
+    "name": "files",
+    "path": "folders/files.yy",
   },
 }

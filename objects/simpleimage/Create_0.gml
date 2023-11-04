@@ -1,18 +1,12 @@
-/// @desc 
+/// @desc Main application
 
-#macro X 0
-#macro Y 1
-
-#macro BUFFER_ASYNC_MAX_SIZE 1073741824
-#macro BUFFER_ASYNC_DEF_SIZE 1024
+#region Initial window setup
 
 SLASH = "/";
 
 if (os_type == os_windows) {
 	SLASH = @'\';
 }
-
-#region Initial window setup
 
 application_surface_enable(false);
 application_surface_draw_enable(false);
@@ -30,7 +24,31 @@ draw_fps = 240;
 
 #region Image State
 
+/// List of handles for async buffer loading
+buffer_load_handles = ds_map_create();
 
+/// List of handles for async sprite loading (used purely by the default loader!)
+sprite_load_handles = ds_map_create();
+
+/// current viewed file instance
+file = undefined;
+
+/// current directory file list
+fdir = [];
+
+/// Schedule a load on a file to load its buffer
+/// @param {Id.File} file
+/// @param {bool} full Whether to load the full contents of the file, or load enough for magic parsing.
+file_schedule_load = function(file, full) {
+	
+	// TODO: handle queueing this
+	assert(file.buf_load_handle == undefined, $"Handle for async buffer load for file {file.fpath} already exists!");
+	
+	var handle_id = buffer_load_async(file.buf, file.fpath, 0, (full ? BUFFER_ASYNC_MAX_SIZE : PARSER_MAGIC_RESERVED));
+	file.buf_load_handle = handle_id;
+	
+	buffer_load_handles[? handle_id] = file;
+}
 
 #endregion
 
@@ -86,19 +104,6 @@ handlers[State.ClickPanning] = function() {
 #endregion
 
 #region Mouse
-
-enum MouseButtons {
-	Left,
-	Middle,
-	Right
-}
-
-enum ClickState {
-	None,
-	Pressed,
-	Held,
-	Released
-}
 
 prev_mouse_x = window_mouse_get_x();
 prev_mouse_y = window_mouse_get_y();
@@ -170,8 +175,8 @@ canvas_width = sprite_get_width(fail_img);
 canvas_height = sprite_get_height(fail_img);
 
 /// how much we've panned the canvas on screen!
-canvas_pan_x = 0;
-canvas_pan_y = 0;
+canvas_x = 0;
+canvas_y = 0;
 
 /// how much we've zoomed the canvas!
 canvas_scale = 1;
@@ -199,8 +204,8 @@ canvas_zoom = function(scale_factor, window_center_x, window_center_y) {
 
 /// move the canvas
 canvas_translate = function(x, y) {
-	canvas_pan_x += x;
-	canvas_pan_y += y;
+	canvas_x += x;
+	canvas_y += y;
 }
 
 /// convert a point in window space to a point in canvas space!
@@ -209,8 +214,8 @@ canvas_translate = function(x, y) {
 /// @returns {array<real>}
 point_to_canvas = function(x, y) {
 	return [
-		(x - canvas_pan_x) / canvas_scale,
-		(y - canvas_pan_y) / canvas_scale,
+		(x - canvas_x) / canvas_scale,
+		(y - canvas_y) / canvas_scale,
 	];
 }
 
@@ -220,15 +225,15 @@ point_to_canvas = function(x, y) {
 /// @returns {array<real>}
 point_from_canvas = function(x, y) {
 	return [
-		(x * canvas_scale) + canvas_pan_x,
-		(y * canvas_scale) + canvas_pan_y
+		(x * canvas_scale) + canvas_x,
+		(y * canvas_scale) + canvas_y
 	];
 }
 
 /// center the canvas
 canvas_center = function() {
-	canvas_pan_x = (window_width / 2) - (canvas_width / 2 * canvas_scale);
-	canvas_pan_y = (window_height / 2) - (canvas_height / 2 * canvas_scale);
+	canvas_x = (window_width / 2) - (canvas_width / 2 * canvas_scale);
+	canvas_y = (window_height / 2) - (canvas_height / 2 * canvas_scale);
 }
 
 /// scale the canvas to fit the screen
@@ -270,10 +275,6 @@ gui_redraw = true;
 /// draw the gui
 gui_draw = function() {
 	
-	if (file != undefined) {
-		draw_text(0, 0, file);
-	}
-	
 	gui_redraw = false;
 }
 
@@ -289,7 +290,7 @@ gui_ensure_exists = function() {
 
 #endregion
 
-#region Event handlers
+#region Input Event handlers
 
 /// called upon window resize.
 /// @param {real} new_width
@@ -329,10 +330,5 @@ on_zoom = function(delta, window_center_x, window_center_y) {
 	
 	canvas_zoom(zoom_factor, window_center_x, window_center_y);
 }
-
-#endregion
-
-#region Final Init!
-
 
 #endregion

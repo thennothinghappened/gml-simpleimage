@@ -11,10 +11,10 @@ function magic_list_detector(magics, num_magics, buf) {
 		var magic = magics[i];
 		
 		if (magic_detector(buf, magic)) {
-			return ImageLoadResult.Success;
+			return true;
 		}
 		
 	}
 	
-	return ImageLoadResult.InvalidImage;
+	return false;
 }

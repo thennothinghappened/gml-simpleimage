@@ -1,4 +1,4 @@
 /// @desc Clean up the async callbacks
 
-ds_map_destroy(async_buffer_queue);
-ds_map_destroy(async_sprite_queue);
+ds_map_destroy(buffer_load_handles);
+ds_map_destroy(sprite_load_handles);

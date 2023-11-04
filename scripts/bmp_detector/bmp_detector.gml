@@ -4,8 +4,8 @@ function bmp_detector(buf) {
 	static magic = [0x42, 0x4D];
 	
 	if (!magic_detector(buf, magic)) {
-		return ImageLoadResult.InvalidImage;
+		return undefined;
 	}
 	
-	return ImageLoadResult.Success;
+	return bmp_parser;
 }

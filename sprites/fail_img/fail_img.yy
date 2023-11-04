@@ -25,8 +25,8 @@
   "nineSlice": null,
   "origin": 0,
   "parent": {
-    "name": "simpleimage",
-    "path": "simpleimage.yyp",
+    "name": "assets",
+    "path": "folders/assets.yy",
   },
   "preMultiplyAlpha": false,
   "sequence": {

@@ -5,7 +5,7 @@
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "util",
-    "path": "folders/util.yy",
+    "name": "simpleimage",
+    "path": "simpleimage.yyp",
   },
 }

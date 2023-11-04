@@ -11,5 +11,9 @@ function jpg_detector(buf) {
 	
 	static magics_num = array_length(magics);
 	
-	return magic_list_detector(magics, magics_num, buf);
+	if (!magic_list_detector(magics, magics_num, buf)) {
+		return undefined;
+	}
+	
+	return default_image_parser;
 }

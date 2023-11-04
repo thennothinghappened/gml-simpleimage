@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "magic_list_detector",
+  "name": "assert",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "detectors",
-    "path": "folders/detectors.yy",
+    "name": "util",
+    "path": "folders/util.yy",
   },
 }
