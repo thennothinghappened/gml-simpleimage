@@ -21,5 +21,8 @@ function dir_load_file_list(dirname) {
 	
 	file_find_close();
 	
-	return dir;
+	return {
+		status: FileLoadResult.Loaded,
+		dir: dir
+	};
 }

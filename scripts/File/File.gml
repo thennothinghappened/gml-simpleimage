@@ -20,11 +20,17 @@ function File(fpath) constructor {
 	/// Loaded sprite for this file (if parseable)
 	self.spr = undefined;
 	
-	/// MUST be called before disposing of this file, or just clearing out its memory for switching.
-	cleanup = function() {
+	/// Cleans up the file's buffer if it exists.
+	cleanup_buffer = function() {
 		if (has_buffer()) {
+			show_message($"deleting buffer for file {fpath}");
 			buffer_delete(self.buf);
 		}
+	}
+	
+	/// MUST be called before disposing of this file, or just clearing out its memory for switching.
+	cleanup = function() {
+		cleanup_buffer();
 		
 		if (has_sprite()) {
 			sprite_delete(self.spr);
@@ -38,11 +44,23 @@ function File(fpath) constructor {
 	}
 	
 	has_buffer = function() {
+		if (self.buf == undefined) {
+			return false;
+		}
+		
 		return buffer_exists(self.buf);
 	}
 	
 	has_sprite = function() {
+		if (self.spr == undefined) {
+			return false;
+		}
+		
 		return sprite_exists(self.spr);
+	}
+	
+	has_parser = function() {
+		return self.parser != undefined;
 	}
 	
 	/// Find the parser for this file. Requires buffer to be loaded.
@@ -55,6 +73,7 @@ function File(fpath) constructor {
 		for (var i = 0; i < global.__type_detectors_count__; i ++) {
 			var detector = global.__type_detectors__[i];
 			
+			buffer_seek(self.buf, buffer_seek_start, 0);
 			parser = detector(self.buf);
 			
 			if (parser == undefined) {
@@ -70,12 +89,25 @@ function File(fpath) constructor {
 			return { status: ImageParseResult.UnsupportedError };
 		}
 		
-		self.parseable = ImageParseResult.Success;
 		self.parser = parser;
 		
 		return {
 			status: ImageParseResult.Success,
 			parser: parser
 		};
+	}
+	
+	/// Using our parser, parse the file!
+	parse = function() {
+		
+		assert(has_buffer(), $"Tried to find parser for file {self.fpath} without existing buffer");
+		assert(has_parser(), $"Tried to parse file {self.fpath} which has no parser");
+		
+		var res = self.parser(self);
+		
+		self.parseable = res.status;
+		self.spr = res[$ "img"];
+		
+		return res;
 	}
 }

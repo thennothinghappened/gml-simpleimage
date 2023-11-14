@@ -11,6 +11,14 @@
 /// How many bytes we'll reserve at least to read magic of a file
 #macro PARSER_MAGIC_RESERVED 16
 
+/// OS's version of slashes, because Windows :)
+global.__SLASH__ = "/";
+#macro SLASH global.__SLASH__
+
+if (os_type == os_windows) {
+	global.__SLASH__ = @'\';
+}
+
 /// Result type for loading a file
 enum FileLoadResult {
 	Loaded,				/// The file loaded successfully

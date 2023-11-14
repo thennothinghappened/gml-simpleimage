@@ -1,22 +1,22 @@
 /// load an image using the default GM loading method (sprite_add)
-/// @param {Struct.ImageParseData} data
+/// @param {Struct.File} data
 function default_image_parser(data) {
 	try {
-		var img = sprite_add(data.url, 1, false, false, 0, 0);
+		var img = sprite_add(data.fpath, 1, false, false, 0, 0);
 		
 		if (!sprite_exists(img)) {
 			throw "Failed to load sprite";
 		}
 		
 		return {
-			status: LoadResult.Success,
+			status: ImageParseResult.Success,
 			img: img
 		};
 		
 	} catch (err) {
 		
 		return {
-			status: LoadResult.ParseFailed,
+			status: ImageParseResult.ParseFailedError,
 			err: err
 		};
 	}

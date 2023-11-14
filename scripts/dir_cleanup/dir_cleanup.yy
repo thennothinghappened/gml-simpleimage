@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "image_load",
+  "name": "dir_cleanup",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "simpleimage",
-    "path": "simpleimage.yyp",
+    "name": "directories",
+    "path": "folders/files/directories.yy",
   },
 }

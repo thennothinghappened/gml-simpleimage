@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /// load an image as a BMP
-/// @param {Struct.ImageParseData} data
+/// @param {Struct.File} data
 function bmp_parser(data) {
 	var b = data.buf;
 	
@@ -33,14 +33,14 @@ function bmp_parser(data) {
 	
 	if (ih_compression != 0) {
 		return {
-			status: LoadResult.Unsupported,
+			status: ImageParseResult.UnsupportedError,
 			err: "BMP Compression not implemented!"
 		};
 	}
 	
 	if (ih_bits != 24) {
 		return {
-			status: LoadResult.Unsupported,
+			status: ImageParseResult.UnsupportedError,
 			err: $"BMP bits {ih_bits} not implemented!"
 		};
 	}
@@ -81,7 +81,7 @@ function bmp_parser(data) {
 	surface_free(surf);
 	
 	return {
-		status: LoadResult.Success,
+		status: ImageParseResult.Success,
 		img: spr
 	};
 }

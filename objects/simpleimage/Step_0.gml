@@ -31,4 +31,4 @@ if (keyboard_check(vk_shift)) {
 
 mouse_state_load();
 
-handlers[state]();
+move_handlers[move_state]();
