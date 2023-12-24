@@ -1,13 +1,13 @@
 {
   "FolderOrderSettings": [
+    {"name":"application","order":10,"path":"folders/application.yy",},
     {"name":"assets","order":6,"path":"folders/assets.yy",},
+    {"name":"legacy","order":12,"path":"folders/legacy.yy",},
     {"name":"files","order":1,"path":"folders/legacy/files.yy",},
     {"name":"directories","order":3,"path":"folders/legacy/files/directories.yy",},
     {"name":"parsers","order":2,"path":"folders/legacy/parsers.yy",},
     {"name":"util","order":3,"path":"folders/legacy/util.yy",},
-    {"name":"application","order":10,"path":"folders/application.yy",},
     {"name":"lib","order":11,"path":"folders/lib.yy",},
-    {"name":"legacy","order":12,"path":"folders/legacy.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"modwrap","order":5,"path":"scripts/modwrap/modwrap.yy",},
