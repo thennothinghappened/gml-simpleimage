@@ -5,7 +5,7 @@
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "simpleimage",
-    "path": "simpleimage.yyp",
+    "name": "legacy",
+    "path": "folders/legacy.yy",
   },
 }

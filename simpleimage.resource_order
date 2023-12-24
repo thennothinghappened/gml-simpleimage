@@ -1,11 +1,13 @@
 {
   "FolderOrderSettings": [
     {"name":"assets","order":6,"path":"folders/assets.yy",},
-    {"name":"detectors","order":3,"path":"folders/detectors.yy",},
-    {"name":"files","order":8,"path":"folders/files.yy",},
-    {"name":"parsers","order":4,"path":"folders/parsers.yy",},
-    {"name":"util","order":2,"path":"folders/util.yy",},
-    {"name":"directories","order":3,"path":"folders/files/directories.yy",},
+    {"name":"files","order":1,"path":"folders/legacy/files.yy",},
+    {"name":"directories","order":3,"path":"folders/legacy/files/directories.yy",},
+    {"name":"parsers","order":2,"path":"folders/legacy/parsers.yy",},
+    {"name":"util","order":3,"path":"folders/legacy/util.yy",},
+    {"name":"application","order":10,"path":"folders/application.yy",},
+    {"name":"lib","order":11,"path":"folders/lib.yy",},
+    {"name":"legacy","order":12,"path":"folders/legacy.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"modwrap","order":5,"path":"scripts/modwrap/modwrap.yy",},
@@ -13,8 +15,8 @@
     {"name":"magic_detector","order":4,"path":"scripts/magic_detector/magic_detector.yy",},
     {"name":"jpg_detector","order":1,"path":"scripts/jpg_detector/jpg_detector.yy",},
     {"name":"strbool","order":8,"path":"scripts/strbool/strbool.yy",},
-    {"name":"defs","order":7,"path":"scripts/defs/defs.yy",},
-    {"name":"simpleimage","order":1,"path":"objects/simpleimage/simpleimage.yy",},
+    {"name":"defs","order":4,"path":"scripts/defs/defs.yy",},
+    {"name":"simpleimage_legacy","order":5,"path":"objects/simpleimage_legacy/simpleimage_legacy.yy",},
     {"name":"magic_list_detector","order":5,"path":"scripts/magic_list_detector/magic_list_detector.yy",},
     {"name":"bmp_detector","order":3,"path":"scripts/bmp_detector/bmp_detector.yy",},
     {"name":"gif_detector","order":2,"path":"scripts/gif_detector/gif_detector.yy",},
@@ -22,6 +24,7 @@
     {"name":"bmp_parser","order":1,"path":"scripts/bmp_parser/bmp_parser.yy",},
     {"name":"dir_load_file_list","order":1,"path":"scripts/dir_load_file_list/dir_load_file_list.yy",},
     {"name":"gif_parser","order":2,"path":"scripts/gif_parser/gif_parser.yy",},
+    {"name":"keywords","order":9,"path":"scripts/keywords/keywords.yy",},
     {"name":"render_error","order":4,"path":"scripts/render_error/render_error.yy",},
   ],
 }

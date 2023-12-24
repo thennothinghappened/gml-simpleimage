@@ -6,6 +6,6 @@
   "isDnD": false,
   "parent": {
     "name": "parsers",
-    "path": "folders/parsers.yy",
+    "path": "folders/legacy/parsers.yy",
   },
 }

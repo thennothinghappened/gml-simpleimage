@@ -6,6 +6,6 @@
   "isDnD": false,
   "parent": {
     "name": "directories",
-    "path": "folders/files/directories.yy",
+    "path": "folders/legacy/files/directories.yy",
   },
 }

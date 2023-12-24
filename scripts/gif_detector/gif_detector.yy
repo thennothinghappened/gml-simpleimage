@@ -6,6 +6,6 @@
   "isDnD": false,
   "parent": {
     "name": "detectors",
-    "path": "folders/detectors.yy",
+    "path": "folders/legacy/detectors.yy",
   },
 }

@@ -73,7 +73,7 @@ file_schedule_load = function(file, full, cb, batch_cb = undefined) {
 /// @param {String|undefined} [selected_fpath] Specific file within the directory to load as current viewed, if specified.
 directory_load = function(dpath, dir, selected_fpath = undefined) {
 	
-	var old_dir = fdir;
+	var old_dir = simpleimage_legacy.fdir;
 	dir_cleanup(old_dir);
 	
 	fdir_path = dpath;
@@ -82,7 +82,7 @@ directory_load = function(dpath, dir, selected_fpath = undefined) {
 	
 	// Callback wrapper.
 	var on_complete = method({ dir: dir, selected_fpath: selected_fpath }, function() {
-		simpleimage.directory_load_finished(dir, selected_fpath);
+		simpleimage_legacy.directory_load_finished(dir, selected_fpath);
 	});
 	
 	array_foreach(dir, method({ dir: dir, selected_fpath: selected_fpath, on_complete: on_complete }, function(file) {
@@ -90,7 +90,7 @@ directory_load = function(dpath, dir, selected_fpath = undefined) {
 		file.create_buffer();
 		
 		// Initially load enough of the file to parse magic.
-		simpleimage.file_schedule_load(file, false, function(file) {
+		simpleimage_legacy.file_schedule_load(file, false, function(file) {
 			
 			var res = file.find_parser();
 			
@@ -157,26 +157,26 @@ image_load = function(file) {
 	app_dir_state = AppDirState.LoadingImage;
 	
 	if (!file.has_parser()) {
-		simpleimage.image_set(file);
+		simpleimage_legacy.image_set(file);
 		return;
 	}
 	
 	// Do a full load of the file to view it!
 	file_schedule_load(file, true, function(file) {
 		
-		simpleimage.app_dir_state = AppDirState.Ok;
+		simpleimage_legacy.app_dir_state = AppDirState.Ok;
 		
 		var res = file.parse();
 		file.cleanup_buffer();
 		
 		if (res.status != ImageParseResult.Success) {
 			
-			simpleimage.app_dir_state = AppDirState.ViewedImageInvalid;
+			simpleimage_legacy.app_dir_state = AppDirState.ViewedImageInvalid;
 			
 			file.spr = render_error(res.err);
 		}
 		
-		simpleimage.image_set(file);
+		simpleimage_legacy.image_set(file);
 		
 	});
 }

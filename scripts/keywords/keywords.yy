@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "dir_load_file_list",
+  "name": "keywords",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "directories",
-    "path": "folders/legacy/files/directories.yy",
+    "name": "util",
+    "path": "folders/legacy/util.yy",
   },
 }
