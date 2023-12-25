@@ -1,7 +1,7 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "EventEmitter",
+  "name": "Err",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
