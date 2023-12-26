@@ -24,7 +24,8 @@ function GifParser() : ImageParser() constructor {
 	/// Returns an Image instance if successful.
 	/// 
 	/// @param {Id.Buffer} b
-	load = function(b) {
+	/// @param {Struct.GifImageData} image_data Data from initial parsing the image.
+	load = function(b, image_data) {
 		return {
 			result: ImageLoadResult.NotImplementedError
 		};

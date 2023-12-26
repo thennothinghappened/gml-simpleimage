@@ -18,47 +18,6 @@ function BmpParser() : ImageParser() constructor {
 	parse = function(b) {
 		
 		const header_res = parse_header(b);
-		
-		if (header_res.result != ImageLoadResult.Success) {
-			return {
-				result: ImageLoadResult.InvalidContentError,
-				err: new Err("Failed to parse BMP header", header_res.err)
-			};
-		}
-		
-		const infoheader_res = parse_infoheader(b);
-		if (infoheader_res.result != ImageLoadResult.Success) {
-			return {
-				result: ImageLoadResult.InvalidContentError,
-				err: new Err("Failed to parse BMP infoheader", infoheader_res.err)
-			};
-		}
-		
-		const infoheader = infoheader_res.data;
-		
-		// We can't create images over the surface size limit, so bail.
-		if (infoheader.width > __SURFACE_LARGEST_RES || infoheader.height > __SURFACE_LARGEST_RES) {
-			return {
-				result: ImageLoadResult.SpriteCreationError,
-				err: new Err($"Cannot create sprites over the size {__SURFACE_LARGEST_RES}x{__SURFACE_LARGEST_RES}, given dimensions {infoheader.width}x{infoheader.height} are too big!")
-			};
-		}
-		
-		return {
-			result: ImageLoadResult.Success,
-			header: header_res.data
-		};
-	}
-	
-
-	/// Attempt to load the full image from the given buffer as a BMP.
-	/// 
-	/// Returns an Image instance if successful.
-	/// 
-	/// @param {Id.Buffer} b
-	load = function(b) {
-		
-		const header_res = parse_header(b);
 		if (header_res.result != ImageLoadResult.Success) {
 			return {
 				result: ImageLoadResult.InvalidContentError,
@@ -86,7 +45,25 @@ function BmpParser() : ImageParser() constructor {
 			};
 		}
 		
-		const image_res = parse_image(header_res.data, infoheader_res.data, b);
+		return {
+			result: ImageLoadResult.Success,
+			data: new BmpImageData(self, header, infoheader)
+		};
+	}
+	
+
+	/// Attempt to load the full image from the given buffer as a BMP.
+	/// 
+	/// Returns an Image instance if successful.
+	/// 
+	/// @param {Id.Buffer} b The buffer to read the image from.
+	/// @param {Struct.BmpImageData} image_data Data from initial parsing the image.
+	load = function(b, image_data) {
+		
+		const header = image_data.header;
+		const infoheader = image_data.infoheader;
+		
+		const image_res = parse_image(header, infoheader, b);
 		if (image_res.result != ImageLoadResult.Success) {
 			return {
 				result: ImageLoadResult.InvalidContentError,
@@ -96,7 +73,7 @@ function BmpParser() : ImageParser() constructor {
 		
 		return {
 			result: ImageLoadResult.Success,
-			data: new Image(image_res.data, new BmpImageData(self, header, infoheader))
+			data: new Image(image_res.data, image_data)
 		};
 	}
 	
@@ -638,15 +615,4 @@ function BmpInfoHeader(
 	self.ppm_h = ppm_h;
 	self.num_colours = num_colours;
 	self.important_colours = important_colours;
-}
-
-/// Parameters for saving a BMP file.
-/// @param {Real} [bits_per_pixel] How many bits each pixel takes up
-/// @param {Enum.BmpCompressionMethod} [compression] Type of compression used on the image
-function BmpSaveParams(
-	bits_per_pixel = 24,
-	compression = BmpCompressionMethod.RGB,
-) constructor {
-	self.bits_per_pixel = bits_per_pixel;
-	self.compression = compression;
 }

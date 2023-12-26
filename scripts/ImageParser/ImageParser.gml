@@ -34,8 +34,9 @@ function ImageParser() constructor {
 	/// 
 	/// Returns an Image instance if successful.
 	/// 
-	/// @param {Id.Buffer} b
-	load = function(b) {
+	/// @param {Id.Buffer} b The buffer to read the image from.
+	/// @param {Struct.ImageData} image_data Data from initial parsing the image.
+	load = function(b, image_data) {
 		return {
 			result: ImageLoadResult.NotImplementedError
 		};
