@@ -14,6 +14,7 @@
     {"name":"bmp","order":1,"path":"folders/lib/image/filetypes/bmp.yy",},
     {"name":"gif","order":2,"path":"folders/lib/image/filetypes/gif.yy",},
     {"name":"util","order":4,"path":"folders/lib/util.yy",},
+    {"name":"sprite","order":3,"path":"folders/lib/image/filetypes/sprite.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"modwrap","order":5,"path":"scripts/modwrap/modwrap.yy",},

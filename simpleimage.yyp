@@ -26,6 +26,7 @@
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"bmp","folderPath":"folders/lib/image/filetypes/bmp.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"gif","folderPath":"folders/lib/image/filetypes/gif.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"util","folderPath":"folders/lib/util.yy",},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"sprite","folderPath":"folders/lib/image/filetypes/sprite.yy",},
   ],
   "IncludedFiles": [],
   "isEcma": false,
@@ -70,6 +71,7 @@
     {"id":{"name":"Err","path":"scripts/Err/Err.yy",},},
     {"id":{"name":"ImageSaveParams","path":"scripts/ImageSaveParams/ImageSaveParams.yy",},},
     {"id":{"name":"render_error","path":"scripts/render_error/render_error.yy",},},
+    {"id":{"name":"SpriteParser","path":"scripts/SpriteParser/SpriteParser.yy",},},
     {"id":{"name":"RmContainer","path":"rooms/RmContainer/RmContainer.yy",},},
   ],
   "RoomOrderNodes": [
