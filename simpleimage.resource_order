@@ -1,6 +1,7 @@
 {
   "FolderOrderSettings": [
     {"name":"application","order":10,"path":"folders/application.yy",},
+    {"name":"util","order":2,"path":"folders/application/util.yy",},
     {"name":"assets","order":6,"path":"folders/assets.yy",},
     {"name":"legacy","order":12,"path":"folders/legacy.yy",},
     {"name":"files","order":1,"path":"folders/legacy/files.yy",},
@@ -9,16 +10,16 @@
     {"name":"util","order":3,"path":"folders/legacy/util.yy",},
     {"name":"lib","order":11,"path":"folders/lib.yy",},
     {"name":"image","order":3,"path":"folders/lib/image.yy",},
-    {"name":"util","order":4,"path":"folders/lib/util.yy",},
     {"name":"filetypes","order":2,"path":"folders/lib/image/filetypes.yy",},
     {"name":"bmp","order":1,"path":"folders/lib/image/filetypes/bmp.yy",},
-    {"name":"util","order":2,"path":"folders/application/util.yy",},
     {"name":"gif","order":2,"path":"folders/lib/image/filetypes/gif.yy",},
+    {"name":"util","order":4,"path":"folders/lib/util.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"modwrap","order":5,"path":"scripts/modwrap/modwrap.yy",},
     {"name":"fail_img","order":1,"path":"sprites/fail_img/fail_img.yy",},
     {"name":"magic_detector","order":4,"path":"scripts/magic_detector/magic_detector.yy",},
+    {"name":"Macros","order":2,"path":"scripts/Macros/Macros.yy",},
     {"name":"jpg_detector","order":1,"path":"scripts/jpg_detector/jpg_detector.yy",},
     {"name":"strbool","order":8,"path":"scripts/strbool/strbool.yy",},
     {"name":"defs","order":4,"path":"scripts/defs/defs.yy",},

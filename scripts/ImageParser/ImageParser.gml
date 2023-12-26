@@ -10,6 +10,7 @@ enum ImageLoadResult {
 	BufferReadError,
 	InvalidContentError,
 	NotImplementedError,
+	BufferCreationError,
 	SpriteCreationError
 }
 

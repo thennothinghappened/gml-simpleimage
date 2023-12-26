@@ -211,6 +211,16 @@ function BmpParser() : ImageParser() constructor {
 	parse_24bit_uncompressed_image = function(header, infoheader, b) {
 		
 		const size = (infoheader.width * 4) * infoheader.height;
+		
+		// Creating a buffer this big crashes GM as it tries to downconvert to an i32.
+		// https://github.com/YoYoGames/GameMaker-Bugs/issues/2590
+		if (size > __32_BIT_SIGNED_INT_LIMIT) {
+			return {
+				result: ImageLoadResult.BufferCreationError,
+				err: new Err($"Cannot allocate a buffer of size {size} (larger than {__32_BIT_SIGNED_INT_LIMIT})")
+			};
+		}
+		
 		const ob = buffer_create(size, buffer_fixed, 1);
 		
 		const num_pixels = infoheader.width * infoheader.height;
