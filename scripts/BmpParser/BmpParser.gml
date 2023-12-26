@@ -8,7 +8,7 @@
 function BmpParser() : ImageParser() constructor {
 	
 	// BMP files start with magic "BM"
-	static magic = ord("B") | (ord("M") << 8);
+	static magic = [ord("B"), ord("M")];
 	
 	/// Attempt to parse the given buffer as a BMP.
 	/// 
@@ -150,8 +150,23 @@ function BmpParser() : ImageParser() constructor {
 		
 		const ob = buffer_create(filesize, buffer_fixed, 1);
 		
-		write_header(ob, header);
-		write_infoheader(ob, infoheader);
+		const header_res = write_header(ob, header);
+		
+		if (header_res.result != ImageSaveResult.Success) {
+			return {
+				result: ImageSaveResult.EncodeError,
+				err: new Err("Failed to write header", header_res.err)
+			};
+		}
+		
+		const infoheader_res = write_infoheader(ob, infoheader);
+		
+		if (infoheader_res.result != ImageSaveResult.Success) {
+			return {
+				result: ImageSaveResult.EncodeError,
+				err: new Err("Failed to write infoheader", infoheader_res.err)
+			};
+		}
 		
 		buffer_copy(encoded_buf, 0, image_bytesize, ob, buffer_tell(ob));
 		buffer_delete(encoded_buf);
@@ -167,20 +182,21 @@ function BmpParser() : ImageParser() constructor {
 	/// @param {Id.Buffer} b
 	parse_header = function(b) {
 		
+		const magic_res = simpleimage_validate_magic(b, magic);
+		
+		if (magic_res.result != MagicValidationResult.Success) {
+			return {
+				result: ImageLoadResult.InvalidContentError,
+				err: new Err("Magic validation failed", magic_res.err)
+			};
+		}
+		
 		try {
 			
-			const read_magic	= buffer_read(b, buffer_u16);
 			const size			= int64(buffer_read(b, buffer_u32));
 			const _reserved1	= buffer_read(b, buffer_u16);
 			const _reserved2	= buffer_read(b, buffer_u16);
 			const offset		= buffer_read(b, buffer_u32);
-			
-			if (read_magic != magic) {
-				return {
-					result: ImageLoadResult.InvalidContentError,
-					err: new Err($"BMP magic bytes '{magic}' do not match found bytes: '{read_magic}'")
-				};
-			}
 			
 			return {
 				result: ImageLoadResult.Success,
@@ -279,49 +295,59 @@ function BmpParser() : ImageParser() constructor {
 	/// Parse a 24 bit uncompressed BMP image.
 	/// @param {Struct.BMPHeader} header
 	/// @param {Struct.BMPInfoHeader} infoheader
-	/// @param {Id.Buffer} b
-	parse_24bit_uncompressed_image = function(header, infoheader, b) {
+	/// @param {Id.Buffer} ib
+	parse_24bit_uncompressed_image = function(header, infoheader, ib) {
 		
-		const size = (infoheader.width * 4) * infoheader.height;
+		// R+G+B
+		static src_bytes_per_pixel = __U8_SIZE * 3;
+		
+		/// R+G+B+A
+		static dest_bytes_per_pixel = __U8_SIZE * 4;
+		
+		const width = infoheader.width;
+		const height = infoheader.height;
+		const offset = header.offset;
+		
+		const out_buffer_size = width * height * dest_bytes_per_pixel;
 		
 		// Creating a buffer this big crashes GM as it tries to downconvert to an i32.
 		// https://github.com/YoYoGames/GameMaker-Bugs/issues/2590
-		if (size > __32_BIT_SIGNED_INT_LIMIT) {
+		if (out_buffer_size > __32_BIT_SIGNED_INT_LIMIT) {
 			return {
 				result: ImageLoadResult.BufferCreationError,
-				err: new Err($"Cannot allocate a buffer of size {size} (larger than {__32_BIT_SIGNED_INT_LIMIT})")
+				err: new Err($"Cannot allocate a buffer of size {out_buffer_size} (larger than {__32_BIT_SIGNED_INT_LIMIT})")
 			};
 		}
 		
-		const ob = buffer_create(size, buffer_fixed, 1);
-		
-		const num_pixels = infoheader.width * infoheader.height;
+		const ob = buffer_create(out_buffer_size, buffer_fixed, 1);
 		
 		try {
 			
-			// Fill with solid white, alpha 1.
-			buffer_fill(ob, 0, buffer_u8, 0xFF, size);
+			// Fill with solid white so we have full opacity.
+			buffer_fill(ob, 0, buffer_u8, 0xFF, out_buffer_size);
 			
-			const src_stride = infoheader.width * 3;
-			const dest_stride = infoheader.width * 4;
-			
-			// Weird flipping shenanigans
-			for (var i = int64(0); i < infoheader.height; i ++) {
+			// BMPs store images upside down (Don't really know why to be honest.)
+			// Copy each row, bottom up (flip vertically):
+			// 
+			// 5[ #.#..#..# ]    1[ #....#..# ]
+			// 4[ #.#..#... ]    2[ #.......# ]
+			// 3[ ###..#..# ] -> 3[ ###..#..# ]
+			// 2[ #.......# ]    4[ #.#..#... ]
+			// 1[ #....#..# ]    5[ #.#..#..# ]
+			for (var yy = 0; yy < height; yy ++) {
 				
-				// We do each row at a time to flip the result vertically
-				// There's probably a better way to do this, but I am exhausted right now.
-				
-				const src_offset = (src_stride * i) + int64(header.offset);
-				const dest_offset = dest_stride * (infoheader.height - i - int64(1));
+				const src_offset = width * src_bytes_per_pixel * (height - yy - 1);
+				const dest_offset = width * dest_bytes_per_pixel * yy;
 				
 				// Red
-				buffer_copy_stride(b, src_offset + 2, 1, 3, infoheader.width, ob, dest_offset + 0, 4);
-				
+				buffer_copy_stride(ib, src_offset + __U8_SIZE * 2, __U8_SIZE, src_bytes_per_pixel, width, ob, dest_offset + __U8_SIZE * 0, dest_bytes_per_pixel);
+		
 				// Green
-				buffer_copy_stride(b, src_offset + 1, 1, 3, infoheader.width, ob, dest_offset + 1, 4);
-				
+				buffer_copy_stride(ib, src_offset + __U8_SIZE * 1, __U8_SIZE, src_bytes_per_pixel, width, ob, dest_offset + __U8_SIZE * 1, dest_bytes_per_pixel);
+		
 				// Blue
-				buffer_copy_stride(b, src_offset + 0, 1, 3, infoheader.width, ob, dest_offset + 2, 4);
+				buffer_copy_stride(ib, src_offset + __U8_SIZE * 0, __U8_SIZE, src_bytes_per_pixel, width, ob, dest_offset + __U8_SIZE * 2, dest_bytes_per_pixel);
+				
 			}
 			
 			
@@ -341,11 +367,11 @@ function BmpParser() : ImageParser() constructor {
 		try {
 			
 			// Avoiding storing duplicate data where possible for large images.
-			os = surface_create(infoheader.width, infoheader.height, surface_rgba8unorm);
+			os = surface_create(width, height, surface_rgba8unorm);
 			buffer_set_surface(ob, os, 0);
 			buffer_delete(ob);
 		
-			sprite = sprite_create_from_surface(os, 0, 0, infoheader.width, infoheader.height, false, false, 0, 0);
+			sprite = sprite_create_from_surface(os, 0, 0, width, height, false, false, 0, 0);
 			surface_free(os);
 			
 		} catch (err_cause) {
@@ -417,12 +443,30 @@ function BmpParser() : ImageParser() constructor {
 	/// @param {Struct.BmpHeader} header Header to write
 	write_header = function(b, header) {
 		
-		buffer_write(b, buffer_u16, magic);					// "BM"
-		buffer_write(b, buffer_u32, header.size);
-		buffer_write(b, buffer_u16, header._reserved1);
-		buffer_write(b, buffer_u16, header._reserved2);
-		buffer_write(b, buffer_u32, header.offset);
+		const magic_res = simpleimage_buffer_write_u8_array(b, magic);
 		
+		if (magic_res.result != BufferWriteResult.Success) {
+			return {
+				result: ImageSaveResult.EncodeError,
+				err: new Err("Failed to write magic bytes to BMP header", err_cause)
+			};
+		}
+		
+		try {
+			buffer_write(b, buffer_u32, header.size);
+			buffer_write(b, buffer_u16, header._reserved1);
+			buffer_write(b, buffer_u16, header._reserved2);
+			buffer_write(b, buffer_u32, header.offset);
+		} catch (err_cause) {
+			return {
+				result: ImageSaveResult.EncodeError,
+				err: new Err("Failed to write BMP header", err_cause)
+			};
+		}
+		
+		return {
+			result: ImageSaveResult.Success
+		};
 	}
 	
 	/// Write the infoheader of a BMP file.
@@ -430,17 +474,30 @@ function BmpParser() : ImageParser() constructor {
 	/// @param {Struct.BmpInfoHeader} infoheader Infoheader to write
 	write_infoheader = function(b, infoheader) {
 		
-		buffer_write(b, buffer_u32, infoheader.header_size);
-		buffer_write(b, buffer_s32, infoheader.width);
-		buffer_write(b, buffer_s32, infoheader.height);
-		buffer_write(b, buffer_u16, infoheader.colour_planes);
-		buffer_write(b, buffer_u16, infoheader.bits_per_pixel);
-		buffer_write(b, buffer_u32, infoheader.compression);
-		buffer_write(b, buffer_u32, infoheader.image_bytesize);
-		buffer_write(b, buffer_s32, infoheader.ppm_w);
-		buffer_write(b, buffer_s32, infoheader.ppm_h);
-		buffer_write(b, buffer_u32, infoheader.num_colours);
-		buffer_write(b, buffer_u32, infoheader.important_colours);
+		try {
+			
+			buffer_write(b, buffer_u32, infoheader.header_size);
+			buffer_write(b, buffer_s32, infoheader.width);
+			buffer_write(b, buffer_s32, infoheader.height);
+			buffer_write(b, buffer_u16, infoheader.colour_planes);
+			buffer_write(b, buffer_u16, infoheader.bits_per_pixel);
+			buffer_write(b, buffer_u32, infoheader.compression);
+			buffer_write(b, buffer_u32, infoheader.image_bytesize);
+			buffer_write(b, buffer_s32, infoheader.ppm_w);
+			buffer_write(b, buffer_s32, infoheader.ppm_h);
+			buffer_write(b, buffer_u32, infoheader.num_colours);
+			buffer_write(b, buffer_u32, infoheader.important_colours);
+			
+		} catch (err_cause) {
+			return {
+				result: ImageSaveResult.EncodeError,
+				err: new Err("Failed to write BMP infoheader", err_cause)
+			};
+		}
+		
+		return {
+			result: ImageSaveResult.Success
+		};
 		
 	}
 
@@ -560,59 +617,4 @@ enum BmpCompressionMethod {
 	RunLengthEncodedCMYK8BPP = 12,
 	/// Run-length-encoded CMYK with 4 bits per pixel
 	RunLengthEncodedCMYK4BPP = 12
-}
-
-/// Header of a BMP file
-/// @param {Int64} size Size in bytes of the BMP file
-/// @param {Real} _reserved1 Reserved byte 1
-/// @param {Real} _reserved2 Reserved byte 2
-/// @param {Real} offset Image data offset in buffer
-function BmpHeader(
-	size,
-	_reserved1 = 0x00,
-	_reserved2 = 0x00,
-	offset
-) constructor {
-	self.size = size;
-	self._reserved1 = _reserved1;
-	self._reserved2 = _reserved2;
-	self.offset = offset;
-}
-
-/// Information Header of a BMP file
-/// @param {Real} header_size Size in bytes of the infoheader
-/// @param {Int64} width Width of the image in pixels
-/// @param {Int64} height Height of the image in pixels
-/// @param {Real} colour_planes Number of colour planes (always 1 for this filetype!)
-/// @param {Real} bits_per_pixel How many bits each pixel takes up
-/// @param {Enum.BmpCompressionMethod} compression Type of compression used on the image
-/// @param {Real} image_bytesize Image size in bytes
-/// @param {Real} ppm_w Width in Pixels Per Meter
-/// @param {Real} ppm_h Height in Pixels Per Meter
-/// @param {Real} num_colours Number of colours in the image
-/// @param {Real} important_colours Number of "important colours"
-function BmpInfoHeader(
-	header_size,
-	width,
-	height,
-	colour_planes,
-	bits_per_pixel,
-	compression,
-	image_bytesize,
-	ppm_w,
-	ppm_h,
-	num_colours,
-	important_colours
-) constructor {
-	self.header_size = header_size;
-	self.width = width;
-	self.height = height;
-	self.colour_planes = colour_planes;
-	self.bits_per_pixel = bits_per_pixel;
-	self.compression = compression;
-	self.image_bytesize = image_bytesize;
-	self.ppm_w = ppm_w;
-	self.ppm_h = ppm_h;
-	self.num_colours = num_colours;
-	self.important_colours = important_colours;
 }

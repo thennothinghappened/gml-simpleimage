@@ -8,6 +8,8 @@
 /// Parser for a GIF file
 function GifParser() : ImageParser() constructor {
 	
+	static magic = [ord("G"), ord("I"), ord("F")];
+	
 	/// Attempt to parse the given buffer as a GIF.
 	/// 
 	/// Returns whether the image can be parsed as a GIF.
@@ -41,5 +43,7 @@ function GifParser() : ImageParser() constructor {
 			result: ImageSaveResult.NotImplementedError
 		};
 	}
+	
+	
 
 }
