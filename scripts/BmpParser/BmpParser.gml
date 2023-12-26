@@ -1,11 +1,14 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      //
-// parser based on the documentation at https://paulbourke.net/dataformats/bmp, thanks! //
+// Parser based on the documentation at https://paulbourke.net/dataformats/bmp, thanks! //
 //                                                                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /// Parser for a BMP file
 function BmpParser() : ImageParser() constructor {
+	
+	// BMP files start with magic "BM"
+	static magic = ord("B") | (ord("M") << 8);
 	
 	/// Attempt to parse the given buffer as a BMP.
 	/// 
@@ -76,7 +79,13 @@ function BmpParser() : ImageParser() constructor {
 	/// Returns a buffer containing the image.
 	/// 
 	/// @param {Struct.Image} image Image to save.
+	/// @param {Struct} params Parameters for how the image should be saved. Unique per image type.
 	save = function(image) {
+		
+		const sprite = image.sprite;
+		
+		
+		
 		return {
 			result: ImageSaveResult.NotImplementedError
 		};
@@ -86,13 +95,10 @@ function BmpParser() : ImageParser() constructor {
 	/// @param {Id.Buffer} b
 	parse_header = function(b) {
 		
-		// BMP files start with magic "BM"
-		static magic = ord("B") | (ord("M") << 8);
-		
 		try {
 			
 			const read_magic	= buffer_read(b, buffer_u16);
-			const size			= buffer_read(b, buffer_u32);
+			const size			= int64(buffer_read(b, buffer_u32));
 			const _reserved1	= buffer_read(b, buffer_u16);
 			const _reserved2	= buffer_read(b, buffer_u16);
 			const offset		= buffer_read(b, buffer_u32);
@@ -129,8 +135,8 @@ function BmpParser() : ImageParser() constructor {
 		try {
 			
 			const header_size		= buffer_read(b, buffer_u32);
-			const width				= buffer_read(b, buffer_s32);
-			const height			= buffer_read(b, buffer_s32);
+			const width				= int64(buffer_read(b, buffer_s32));
+			const height			= int64(buffer_read(b, buffer_s32));
 			const colour_planes		= buffer_read(b, buffer_u16);
 			const bits_per_pixel	= buffer_read(b, buffer_u16);
 			const compression		= buffer_read(b, buffer_u32);
@@ -171,35 +177,25 @@ function BmpParser() : ImageParser() constructor {
 	/// @param {Id.Buffer} b
 	parse_image = function(header, infoheader, b) {
 		
-		if (infoheader.compression != 0) {
-			return parse_compressed_image(header, infoheader, b);
+		switch (infoheader.compression) {
+			case BmpCompressionMethod.RGB: return parse_uncompressed_rgb_image(header, infoheader, b);
 		}
 		
-		return parse_uncompressed_image(header, infoheader, b);
-		
-	}
-	
-	/// Parse image data for a compressed BMP
-	/// @param {Struct.BMPHeader} header
-	/// @param {Struct.BMPInfoHeader} infoheader
-	/// @param {Id.Buffer} b
-	parse_compressed_image = function(header, infoheader, b) {
 		return {
 			result: ImageLoadResult.NotImplementedError,
-			err: new Err("Parsing compressed BMPs is not implemented!")
+			err: new Err($"Parsing BMP compression type {infoheader.compression} not implemented!")
 		};
+		
 	}
 	
-	/// Parse image data for an uncompressed BMP
+	/// Parse image data for an uncompressed RGB BMP
 	/// @param {Struct.BMPHeader} header
 	/// @param {Struct.BMPInfoHeader} infoheader
 	/// @param {Id.Buffer} b
-	parse_uncompressed_image = function(header, infoheader, b) {
+	parse_uncompressed_rgb_image = function(header, infoheader, b) {
 		
 		switch (infoheader.bits_per_pixel) {
-			case 24: {
-				return parse_24bit_uncompressed_image(header, infoheader, b);
-			}
+			case 24: return parse_24bit_uncompressed_image(header, infoheader, b);
 		}
 		
 		return {
@@ -228,13 +224,13 @@ function BmpParser() : ImageParser() constructor {
 			const dest_stride = infoheader.width * 4;
 			
 			// Weird flipping shenanigans
-			for (var i = 0; i < infoheader.height; i ++) {
+			for (var i = int64(0); i < infoheader.height; i ++) {
 				
 				// We do each row at a time to flip the result vertically
 				// There's probably a better way to do this, but I am exhausted right now.
 				
-				const src_offset = (src_stride * i) + header.offset;
-				const dest_offset = dest_stride * (infoheader.height - i - 1);
+				const src_offset = (src_stride * i) + int64(header.offset);
+				const dest_offset = dest_stride * (infoheader.height - i - int64(1));
 				
 				// Red
 				buffer_copy_stride(b, src_offset + 2, 1, 3, infoheader.width, ob, dest_offset + 0, 4);
@@ -257,13 +253,38 @@ function BmpParser() : ImageParser() constructor {
 			};
 		}
 		
-		const os = surface_create(infoheader.width, infoheader.height, surface_rgba8unorm);
-		buffer_set_surface(ob, os, 0);
+		var os = -1;
+		var sprite = -1;
 		
-		const sprite = sprite_create_from_surface(os, 0, 0, infoheader.width, infoheader.height, false, false, 0, 0);
+		try {
+			
+			// Avoiding storing duplicate data where possible for large images.
+			os = surface_create(infoheader.width, infoheader.height, surface_rgba8unorm);
+			buffer_set_surface(ob, os, 0);
+			buffer_delete(ob);
 		
-		buffer_delete(ob);
-		surface_free(os);
+			sprite = sprite_create_from_surface(os, 0, 0, infoheader.width, infoheader.height, false, false, 0, 0);
+			surface_free(os);
+			
+		} catch (err_cause) {
+			
+			if (buffer_exists(ob)) {
+				buffer_delete(ob);
+			}
+			
+			if (surface_exists(os)) {
+				surface_free(os);
+			}
+			
+			if (sprite_exists(sprite)) {
+				sprite_delete(sprite);
+			}
+			
+			return {
+				result: ImageLoadResult.SpriteCreationError,
+				err: new Err("Failed to create image sprite", err_cause)
+			};
+		}
 		
 		return {
 			result: ImageLoadResult.Success,
@@ -273,8 +294,33 @@ function BmpParser() : ImageParser() constructor {
 
 }
 
+// https://en.wikipedia.org/wiki/BMP_file_format#Compression
+// https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wmf/4e588f70-bd92-4a6f-b77f-35d0feaf7a57
+enum BmpCompressionMethod {
+	/// Uncompressed RGB
+	RGB = 0,
+	/// Run-length-encoded RGB with 8 bits per pixel
+	RunLengthEncoded8BPP = 1,
+	/// Run-length-encoded RGB with 4 bits per pixel
+	RunLengthEncoded4BPP = 2,
+	/// RGB bit field masks (todo: ?)
+	BitFields = 3,
+	/// JPEG pass-through
+	JPEG = 4,
+	/// PNG pass-through
+	PNG = 5,
+	/// "RGBA bit field masks" (?)
+	AlphaBitFields = 6,
+	/// Uncompressed CMYK
+	CMYK = 11,
+	/// Run-length-encoded CMYK with 8 bits per pixel
+	RunLengthEncodedCMYK8BPP = 12,
+	/// Run-length-encoded CMYK with 4 bits per pixel
+	RunLengthEncodedCMYK4BPP = 12
+}
+
 /// Header of a BMP file
-/// @param {Real} size Size in bytes of the BMP file
+/// @param {Int64} size Size in bytes of the BMP file
 /// @param {Real} _reserved1 Reserved byte 1
 /// @param {Real} _reserved2 Reserved byte 2
 /// @param {Real} offset Image data offset in buffer
@@ -292,11 +338,11 @@ function BmpHeader(
 
 /// Information Header of a BMP file
 /// @param {Real} header_size Size in bytes of the infoheader
-/// @param {Real} width Width of the image in pixels
-/// @param {Real} height Height of the image in pixels
+/// @param {Int64} width Width of the image in pixels
+/// @param {Int64} height Height of the image in pixels
 /// @param {Real} colour_planes Number of colour planes (always 1 for this filetype!)
 /// @param {Real} bits_per_pixel How many bits each pixel takes up
-/// @param {Real} compression Type of compression used on the image
+/// @param {Enum.BmpCompressionMethod} compression Type of compression used on the image
 /// @param {Real} image_bytesize Image size in bytes
 /// @param {Real} ppm_w Width in Pixels Per Meter
 /// @param {Real} ppm_h Height in Pixels Per Meter
@@ -326,4 +372,11 @@ function BmpInfoHeader(
 	self.ppm_h = ppm_h;
 	self.num_colours = num_colours;
 	self.important_colours = important_colours;
+}
+
+/// Parameters for saving a BMP file.
+function BmpSaveParams(
+	
+) constructor {
+	
 }

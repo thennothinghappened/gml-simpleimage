@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "EventEmitter",
+  "name": "GifImageData",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "util",
-    "path": "folders/application/util.yy",
+    "name": "gif",
+    "path": "folders/lib/image/filetypes/gif.yy",
   },
 }

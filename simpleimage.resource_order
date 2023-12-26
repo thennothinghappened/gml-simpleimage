@@ -12,6 +12,8 @@
     {"name":"util","order":4,"path":"folders/lib/util.yy",},
     {"name":"filetypes","order":2,"path":"folders/lib/image/filetypes.yy",},
     {"name":"bmp","order":1,"path":"folders/lib/image/filetypes/bmp.yy",},
+    {"name":"util","order":2,"path":"folders/application/util.yy",},
+    {"name":"gif","order":2,"path":"folders/lib/image/filetypes/gif.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"modwrap","order":5,"path":"scripts/modwrap/modwrap.yy",},
@@ -30,6 +32,7 @@
     {"name":"dir_load_file_list","order":1,"path":"scripts/dir_load_file_list/dir_load_file_list.yy",},
     {"name":"gif_parser","order":2,"path":"scripts/gif_parser/gif_parser.yy",},
     {"name":"ImageData","order":3,"path":"scripts/ImageData/ImageData.yy",},
+    {"name":"GifParser","order":1,"path":"scripts/GifParser/GifParser.yy",},
     {"name":"keywords","order":9,"path":"scripts/keywords/keywords.yy",},
     {"name":"ImageParser","order":1,"path":"scripts/ImageParser/ImageParser.yy",},
     {"name":"AppWindow","order":1,"path":"scripts/AppWindow/AppWindow.yy",},

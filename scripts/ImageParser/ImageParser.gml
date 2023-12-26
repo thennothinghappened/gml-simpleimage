@@ -9,7 +9,8 @@ enum ImageLoadResult {
 	Success,
 	BufferReadError,
 	InvalidContentError,
-	NotImplementedError
+	NotImplementedError,
+	SpriteCreationError
 }
 
 enum ImageSaveResult {
@@ -47,7 +48,8 @@ function ImageParser() constructor {
 	/// Returns a buffer containing the image.
 	/// 
 	/// @param {Struct.Image} image Image to save.
-	save = function(image) {
+	/// @param {Struct} params Parameters for how the image should be saved. Unique per image type.
+	save = function(image, params) {
 		return {
 			result: ImageSaveResult.NotImplementedError
 		};
