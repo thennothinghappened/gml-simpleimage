@@ -7,6 +7,6 @@ function Err(_msg, _cause = undefined) constructor {
 	site = debug_get_callstack(2)[1];
 	
 	toString = function() {
-		return $"Error: {msg} at {site}" + (cause == undefined ? "" : $"\nCause: {cause}") + "\n";
+		return $"Error: {msg}\n at {site}" + (cause == undefined ? "" : $"\nCause: {cause}") + "\n";
 	}
 }

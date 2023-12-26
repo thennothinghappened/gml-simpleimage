@@ -1,10 +1,4 @@
 
-enum ImageParsableResult {
-	Parsable,
-	NotParseable,
-	NotImplementedError
-}
-
 enum ImageLoadResult {
 	Success,
 	BufferReadError,
@@ -16,6 +10,9 @@ enum ImageLoadResult {
 
 enum ImageSaveResult {
 	Success,
+	GetSurfaceError,
+	TooLargeError,
+	EncodeError,
 	NotImplementedError
 }
 
@@ -29,7 +26,7 @@ function ImageParser() constructor {
 	/// @param {Id.Buffer} b Input image buffer to parse
 	parse = function(b) {
 		return {
-			result: ImageParsableResult.NotImplementedError
+			result: ImageLoadResult.NotImplementedError
 		};
 	}
 	

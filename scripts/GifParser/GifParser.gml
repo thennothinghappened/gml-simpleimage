@@ -15,7 +15,7 @@ function GifParser() : ImageParser() constructor {
 	/// @param {Id.Buffer} b Input image buffer to parse
 	parse = function(b) {
 		return {
-			result: ImageParsableResult.NotImplementedError
+			result: ImageLoadResult.NotImplementedError
 		};
 	}
 	

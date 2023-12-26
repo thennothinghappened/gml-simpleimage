@@ -21,13 +21,31 @@ function BmpParser() : ImageParser() constructor {
 		
 		if (header_res.result != ImageLoadResult.Success) {
 			return {
-				result: ImageParsableResult.NotParseable,
+				result: ImageLoadResult.InvalidContentError,
 				err: new Err("Failed to parse BMP header", header_res.err)
 			};
 		}
 		
+		const infoheader_res = parse_infoheader(b);
+		if (infoheader_res.result != ImageLoadResult.Success) {
+			return {
+				result: ImageLoadResult.InvalidContentError,
+				err: new Err("Failed to parse BMP infoheader", infoheader_res.err)
+			};
+		}
+		
+		const infoheader = infoheader_res.data;
+		
+		// We can't create images over the surface size limit, so bail.
+		if (infoheader.width > __SURFACE_LARGEST_RES || infoheader.height > __SURFACE_LARGEST_RES) {
+			return {
+				result: ImageLoadResult.SpriteCreationError,
+				err: new Err($"Cannot create sprites over the size {__SURFACE_LARGEST_RES}x{__SURFACE_LARGEST_RES}, given dimensions {infoheader.width}x{infoheader.height} are too big!")
+			};
+		}
+		
 		return {
-			result: ImageParsableResult.Parsable,
+			result: ImageLoadResult.Success,
 			header: header_res.data
 		};
 	}
@@ -60,6 +78,14 @@ function BmpParser() : ImageParser() constructor {
 		
 		const infoheader = infoheader_res.data;
 		
+		// We can't create images over the surface size limit, so bail.
+		if (infoheader.width > __SURFACE_LARGEST_RES || infoheader.height > __SURFACE_LARGEST_RES) {
+			return {
+				result: ImageLoadResult.SpriteCreationError,
+				err: new Err($"Cannot create sprites over the size {__SURFACE_LARGEST_RES}x{__SURFACE_LARGEST_RES}, given dimensions {infoheader.width}x{infoheader.height} are too big!")
+			};
+		}
+		
 		const image_res = parse_image(header_res.data, infoheader_res.data, b);
 		if (image_res.result != ImageLoadResult.Success) {
 			return {
@@ -79,16 +105,85 @@ function BmpParser() : ImageParser() constructor {
 	/// Returns a buffer containing the image.
 	/// 
 	/// @param {Struct.Image} image Image to save.
-	/// @param {Struct} params Parameters for how the image should be saved. Unique per image type.
-	save = function(image) {
+	/// @param {Struct.BmpSaveParams} params Parameters for how the image should be saved. Unique per image type.
+	save = function(image, params) {
 		
-		const sprite = image.sprite;
+		static header_bytesize = get_header_bytesize();
+		static infoheader_bytesize = get_infoheader_bytesize();
 		
+		// We only save the first image of the sprite.
+		const buffer_res = image.get_buffer(0);
 		
+		if (buffer_res.result != SpriteSurfaceCreationResult.Success) {
+			return {
+				result: ImageSaveResult.GetSurfaceError,
+				err: new Err("Failed to get the sprite's buffer", buffer_res.err)
+			};
+		}
+		
+		// TODO: do this all properly to support other modes!!
+		const offset = header_bytesize + infoheader_bytesize;
+		
+		const input_buffer = buffer_res.data;
+		const encode_res = encode(input_buffer, image.width, image.height, params);
+		
+		buffer_delete(input_buffer);
+		
+		if (encode_res.result != ImageSaveResult.Success) {
+			return {
+				result: ImageSaveResult.EncodeError,
+				err: new Err("Failed to encode image", encode_res.err)
+			};
+		}
+		
+		const encoded_buf = encode_res.data;
+		const image_bytesize = int64(buffer_get_size(encoded_buf));
+		const filesize = int64(header_bytesize) + int64(infoheader_bytesize) + image_bytesize;
+		
+		if (filesize >= __32_BIT_SIGNED_INT_LIMIT) {
+			
+			buffer_delete(encoded_buf);
+			
+			return {
+				result: ImageSaveResult.TooLargeError,
+				err: new Err($"Final image is too large, size {filesize} exceeds max size {__32_BIT_SIGNED_INT_LIMIT}")
+			};
+		}
+		
+		const header = new BmpHeader(
+			filesize,
+			0x00,
+			0x00,
+			offset
+		);
+		
+		const infoheader = new BmpInfoHeader(
+			infoheader_bytesize,
+			image.width,
+			image.height,
+			1,
+			params.bits_per_pixel,
+			params.compression,
+			image_bytesize,
+			image.width,	// TODO
+			image.height,	// TODO
+			0xFFFFFF,		// TODO
+			0x00			// TODO
+		);
+		
+		const ob = buffer_create(filesize, buffer_fixed, 1);
+		
+		write_header(ob, header);
+		write_infoheader(ob, infoheader);
+		
+		buffer_copy(encoded_buf, 0, image_bytesize, ob, buffer_tell(ob));
+		buffer_delete(encoded_buf);
 		
 		return {
-			result: ImageSaveResult.NotImplementedError
+			result: ImageSaveResult.Success,
+			data: ob
 		};
+		
 	}
 	
 	/// Parse the BMP file header.
@@ -302,8 +397,169 @@ function BmpParser() : ImageParser() constructor {
 		};
 	}
 
+	/// Returns the filesize of the BMP header.
+	get_header_bytesize = function() {
+		
+		// (14 bytes)
+		static header_size = 
+			__U16_SIZE +		// "BM"
+			__U32_SIZE +		// size
+			__U16_SIZE +		// _reserved1
+			__U16_SIZE +		// _reserved2
+			__U32_SIZE			// offset
+		
+		
+		
+		return header_size;
+	}
+	
+	/// Returns the filesize of the BMP infoheader.
+	get_infoheader_bytesize = function() {
+		
+		// Note: we're only worrying about the later BMP revision (larger infoheader) for simplicity sake.
+		
+		// (40 bytes)
+		static infoheader_size =
+			__U32_SIZE +		// header_size
+			__S32_SIZE +		// width
+			__S32_SIZE +		// height
+			__U16_SIZE +		// colour_planes
+			__U16_SIZE +		// bits_per_pixel
+			__U32_SIZE +		// compression
+			__U32_SIZE +		// image_bytesize
+			__S32_SIZE +		// ppm_w
+			__S32_SIZE +		// ppm_h
+			__U32_SIZE +		// num_colours
+			__U32_SIZE			// important_colours
+		
+		return infoheader_size;
+	}
+
+	/// Write the header of a BMP file.
+	/// @param {Id.Buffer} b Buffer to write to
+	/// @param {Struct.BmpHeader} header Header to write
+	write_header = function(b, header) {
+		
+		buffer_write(b, buffer_u16, magic);					// "BM"
+		buffer_write(b, buffer_u32, header.size);
+		buffer_write(b, buffer_u16, header._reserved1);
+		buffer_write(b, buffer_u16, header._reserved2);
+		buffer_write(b, buffer_u32, header.offset);
+		
+	}
+	
+	/// Write the infoheader of a BMP file.
+	/// @param {Id.Buffer} b Buffer to write to
+	/// @param {Struct.BmpInfoHeader} infoheader Infoheader to write
+	write_infoheader = function(b, infoheader) {
+		
+		buffer_write(b, buffer_u32, infoheader.header_size);
+		buffer_write(b, buffer_s32, infoheader.width);
+		buffer_write(b, buffer_s32, infoheader.height);
+		buffer_write(b, buffer_u16, infoheader.colour_planes);
+		buffer_write(b, buffer_u16, infoheader.bits_per_pixel);
+		buffer_write(b, buffer_u32, infoheader.compression);
+		buffer_write(b, buffer_u32, infoheader.image_bytesize);
+		buffer_write(b, buffer_s32, infoheader.ppm_w);
+		buffer_write(b, buffer_s32, infoheader.ppm_h);
+		buffer_write(b, buffer_u32, infoheader.num_colours);
+		buffer_write(b, buffer_u32, infoheader.important_colours);
+		
+	}
+
+	/// Encode a given image as BMP.
+	/// @param {Id.Buffer} ib Input surface buffer as surface_rgba8unorm.
+	/// @param {Real} width Width of the image.
+	/// @param {Real} height Height of the image.
+	/// @param {Struct.BmpSaveParams} params Parameters for how the image should be encoded.
+	encode = function(ib, width, height, params) {
+		
+		// Encoding method massively depends on compression so I'm splitting it out here.
+		switch (params.compression) {
+			case BmpCompressionMethod.RGB: return encode_rgb(ib, width, height, params);
+		}
+		
+		return {
+			result: ImageSaveResult.NotImplementedError,
+			err: new Err($"BMP Compression Method {params.compression} not implemented!")
+		};
+		
+	}
+	
+	/// Encode an uncompressed RGB BMP.
+	/// @param {Id.Buffer} ib Input surface buffer as surface_rgba8unorm.
+	/// @param {Real} width Width of the image.
+	/// @param {Real} height Height of the image.
+	/// @param {Struct.BmpSaveParams} params Parameters for how the image should be encoded.
+	encode_rgb = function(ib, width, height, params) {
+		
+		// BPP changes method yet again!
+		switch (params.bits_per_pixel) {
+			case 24: return encode_rgb_24bpp(ib, width, height, params);
+		}
+		
+		return {
+			result: ImageSaveResult.NotImplementedError,
+			err: new Err($"Bits-per-pixel {params.bits_per_pixel} not implemented for compression type RGB")
+		};
+	}
+	
+	/// Encode an uncompressed 24 bits-per-pixel RGB BMP.
+	/// @param {Id.Buffer} ib Input surface buffer as surface_rgba8unorm.
+	/// @param {Real} width Width of the image.
+	/// @param {Real} height Height of the image.
+	/// @param {Struct.BmpSaveParams} params Parameters for how the image should be encoded.
+	encode_rgb_24bpp = function(ib, width, height, params) {
+		
+		// R+G+B+A
+		static src_bytes_per_pixel = __U8_SIZE * 4;
+		
+		/// R+G+B
+		static dest_bytes_per_pixel = __U8_SIZE * 3;
+		
+		const num_pixels = width * height;
+		const bytesize = int64(num_pixels * dest_bytes_per_pixel);
+		
+		if (bytesize >= __32_BIT_SIGNED_INT_LIMIT) {
+			return {
+				result: ImageSaveResult.TooLargeError,
+				err: new Err($"Unable to create a BMP of size {bytesize}, greater than {__32_BIT_SIGNED_INT_LIMIT}")
+			};
+		}
+		
+		const ob = buffer_create(bytesize, buffer_fixed, 1);
+		
+		// Copy each row, bottom up (flip vertically)
+		// 
+		// 1[ #....#..# ]    5[ #.#..#..# ]
+		// 2[ #.......# ]    4[ #.#..#... ]
+		// 3[ ###..#..# ] -> 3[ ###..#..# ]
+		// 4[ #.#..#... ]    2[ #.......# ]
+		// 5[ #.#..#..# ]    1[ #....#..# ]
+		for (var yy = 0; yy < height; yy ++) {
+			
+			const src_offset = width * src_bytes_per_pixel * (height - yy - 1);
+			const dest_offset = width * dest_bytes_per_pixel * yy;
+			
+			// Red
+			buffer_copy_stride(ib, src_offset + __U8_SIZE * 2, __U8_SIZE, src_bytes_per_pixel, width, ob, dest_offset + __U8_SIZE * 0, dest_bytes_per_pixel);
+		
+			// Green
+			buffer_copy_stride(ib, src_offset + __U8_SIZE * 1, __U8_SIZE, src_bytes_per_pixel, width, ob, dest_offset + __U8_SIZE * 1, dest_bytes_per_pixel);
+		
+			// Blue
+			buffer_copy_stride(ib, src_offset + __U8_SIZE * 0, __U8_SIZE, src_bytes_per_pixel, width, ob, dest_offset + __U8_SIZE * 2, dest_bytes_per_pixel);
+		}
+		
+		return {
+			result: ImageSaveResult.Success,
+			data: ob
+		};
+	}
+
 }
 
+/// List of compression methods BMP files support (there's uh, quite a few...)
 // https://en.wikipedia.org/wiki/BMP_file_format#Compression
 // https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wmf/4e588f70-bd92-4a6f-b77f-35d0feaf7a57
 enum BmpCompressionMethod {
@@ -336,8 +592,8 @@ enum BmpCompressionMethod {
 /// @param {Real} offset Image data offset in buffer
 function BmpHeader(
 	size,
-	_reserved1,
-	_reserved2,
+	_reserved1 = 0x00,
+	_reserved2 = 0x00,
 	offset
 ) constructor {
 	self.size = size;
@@ -385,8 +641,12 @@ function BmpInfoHeader(
 }
 
 /// Parameters for saving a BMP file.
+/// @param {Real} [bits_per_pixel] How many bits each pixel takes up
+/// @param {Enum.BmpCompressionMethod} [compression] Type of compression used on the image
 function BmpSaveParams(
-	
+	bits_per_pixel = 24,
+	compression = BmpCompressionMethod.RGB,
 ) constructor {
-	
+	self.bits_per_pixel = bits_per_pixel;
+	self.compression = compression;
 }
