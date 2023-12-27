@@ -50,7 +50,6 @@ function BmpParser() : ImageParser() constructor {
 			data: new BmpImageData(self, header, infoheader)
 		};
 	}
-	
 
 	/// Attempt to load the full image from the given buffer as a BMP.
 	/// 

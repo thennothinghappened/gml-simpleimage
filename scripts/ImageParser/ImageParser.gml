@@ -26,7 +26,8 @@ function ImageParser() constructor {
 	/// @param {Id.Buffer} b Input image buffer to parse
 	parse = function(b) {
 		return {
-			result: ImageLoadResult.NotImplementedError
+			result: ImageLoadResult.NotImplementedError,
+			err: new Err("Parsing not implemented for this image type")
 		};
 	}
 	
@@ -38,7 +39,8 @@ function ImageParser() constructor {
 	/// @param {Struct.ImageData} image_data Data from initial parsing the image.
 	load = function(b, image_data) {
 		return {
-			result: ImageLoadResult.NotImplementedError
+			result: ImageLoadResult.NotImplementedError,
+			err: new Err("Loading not implemented for this image type")
 		};
 	}
 	
@@ -50,7 +52,8 @@ function ImageParser() constructor {
 	/// @param {Struct} params Parameters for how the image should be saved. Unique per image type.
 	save = function(image, params) {
 		return {
-			result: ImageSaveResult.NotImplementedError
+			result: ImageSaveResult.NotImplementedError,
+			err: new Err("Saving not implemented for this image type")
 		};
 	}
 	
