@@ -44,11 +44,9 @@ function GifParser() : ImageParser() constructor {
 		
 		const lsd = lsd_res.data;
 		
-		show_message($"header: {header}, lsd: {lsd}");
-		
 		return {
-			result: ImageLoadResult.NotImplementedError,
-			err: new Err("Parsing not yet implemented for GIFs")
+			result: ImageLoadResult.Success,
+			data: new GifImageData(header, lsd, self)
 		};
 	}
 	
@@ -59,6 +57,38 @@ function GifParser() : ImageParser() constructor {
 	/// @param {Id.Buffer} b
 	/// @param {Struct.GifImageData} image_data Data from initial parsing the image.
 	load = function(b, image_data) {
+		
+		const header = image_data.header;
+		const lsd = image_data.lsd;
+		
+		show_message($"header: {header}, lsd: {lsd}");
+		
+		// temp. draw the gif's palette!
+		if (lsd.gct_info != undefined) {
+			
+			const gct = lsd.gct_info;
+			const gct_res = ceil(sqrt(gct.size));
+			const out_size = gct.size * __U8_SIZE * 4;
+			
+			const ob = buffer_create(out_size, buffer_fixed, 1);
+			buffer_fill(ob, 0, buffer_u8, 0xFF, out_size);
+			
+			buffer_copy_stride(b, gct.table_offset, __U8_SIZE * 3, __U8_SIZE * 3, gct.size, ob, 0, __U8_SIZE * 4);
+			
+			const surf = surface_create(gct_res, gct_res, surface_rgba8unorm);
+			buffer_set_surface(ob, surf, 0);
+			
+			buffer_delete(ob);
+			
+			const sprite = sprite_create_from_surface(surf, 0, 0, gct_res, gct_res, false, false, 0, 0);
+			surface_free(surf);
+			
+			return {
+				result: ImageLoadResult.Success,
+				data: new Image(sprite, new GifImageData(self))
+			};
+		}
+		
 		return {
 			result: ImageLoadResult.NotImplementedError,
 			err: new Err("Loading not yet implemented for GIFs")
@@ -122,24 +152,27 @@ function GifParser() : ImageParser() constructor {
 		
 		try {
 			
-			const width					= buffer_read(b, buffer_u16);
-			const height				= buffer_read(b, buffer_u16);
+			const width								= buffer_read(b, buffer_u16);
+			const height							= buffer_read(b, buffer_u16);
 			
-			const packed_byte			= buffer_read(b, buffer_u8);
-			const gct_enabled			= bool(     (packed_byte & 0b10000000) >> 7);
-			const gct_bits_per_pixel	= (         (packed_byte & 0b01110000) >> 4) + 1;
-			const gct_is_sorted			= bool(     (packed_byte & 0b00001000) >> 3);
-			const gct_size				= power(2, ((packed_byte & 0b00000111) >> 0) + 1);
-			const gct_bgcol_index		= buffer_read(b, buffer_u8);
+			const packed_byte						= buffer_read(b, buffer_u8);
+			const gct_enabled						= bool(     (packed_byte & 0b10000000) >> 7);
+			const gct_src_image_colour_resolution	= (         (packed_byte & 0b01110000) >> 4) + 1;
+			const gct_is_sorted						= bool(     (packed_byte & 0b00001000) >> 3);
+			const gct_size							= power(2, ((packed_byte & 0b00000111) >> 0) + 1);
+			const gct_bgcol_index					= buffer_read(b, buffer_u8);
 			
 			// TODO: use?
 			const pixel_aspect_ratio	= (buffer_read(b, buffer_u8) + 15) / 64;
 			
+			const gct_table_offset = buffer_tell(b);
+			
 			const gct_info = (gct_enabled) ? new GifGlobalColourTableInfo(
-				gct_bits_per_pixel,
 				gct_is_sorted,
 				gct_size,
-				gct_bgcol_index
+				gct_table_offset,
+				gct_bgcol_index,
+				gct_src_image_colour_resolution
 			) : undefined
 			
 			return {
