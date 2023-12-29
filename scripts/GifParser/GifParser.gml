@@ -305,7 +305,7 @@ function GifParser() : ImageParser() constructor {
 	/// @param {Real} block_start_offset Start of this block.
 	parse_gif_extension_comment = function(b, block_start_offset) {
 		
-		const sub_blocks_res = parse_sub_blocks(b);
+		const sub_blocks_res = parse_sub_blocks(b, block_start_offset);
 		if (sub_blocks_res.result != ImageLoadResult.Success) {
 			return {
 				result: ImageLoadResult.InvalidContentError,
