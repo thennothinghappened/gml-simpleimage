@@ -5,7 +5,7 @@
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "gif",
-    "path": "folders/lib/image/filetypes/gif.yy",
+    "name": "blocks",
+    "path": "folders/lib/image/filetypes/gif/blocks.yy",
   },
 }

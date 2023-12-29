@@ -57,4 +57,9 @@ function ImageParser() constructor {
 		};
 	}
 	
+	/// Provide information as string about this parser.
+	toString = function() {
+		return $"{instanceof(self)}()";
+	}
+	
 }

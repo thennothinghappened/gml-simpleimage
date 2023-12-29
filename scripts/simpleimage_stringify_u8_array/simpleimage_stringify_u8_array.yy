@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "GifColourTableInfo",
+  "name": "simpleimage_stringify_u8_array",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "data",
-    "path": "folders/lib/image/filetypes/gif/data.yy",
+    "name": "util",
+    "path": "folders/lib/util.yy",
   },
 }

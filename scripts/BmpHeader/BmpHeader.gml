@@ -14,4 +14,8 @@ function BmpHeader(
 	self._reserved1 = _reserved1;
 	self._reserved2 = _reserved2;
 	self.offset = offset;
+	
+	toString = function() {
+		return $"BmpHeader(size={size}, _reserved1={_reserved1}, _reserved2={_reserved2}, offset={offset})";
+	}
 }

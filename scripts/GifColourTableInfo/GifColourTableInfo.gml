@@ -20,6 +20,10 @@ function GifColourTableInfo(
 	get_bytesize = function() {
 		return size * colour_bytesize;
 	}
+	
+	toString = function() {
+		return $"GifColourTableInfo(is_sorted={is_sorted}, size={size}, table_offset={table_offset})";
+	}
 }
 
 /// Information about the Global Colour Table for a GIF file.
@@ -37,4 +41,8 @@ function GifGlobalColourTableInfo(
 ) : GifColourTableInfo(is_sorted, size, table_offset) constructor {
 	self.background_colour_index = background_colour_index;
 	self.src_image_colour_resolution = src_image_colour_resolution;
+	
+	toString = function() {
+		return $"GifGlobalColourTableInfo(is_sorted={is_sorted}, size={size}, table_offset={table_offset}, background_colour_index={background_colour_index}, src_image_colour_resolution={src_image_colour_resolution})";
+	}
 }

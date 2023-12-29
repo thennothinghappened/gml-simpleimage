@@ -1,11 +1,11 @@
 {
   "resourceType": "GMScript",
   "resourceVersion": "1.0",
-  "name": "GifColourTableInfo",
+  "name": "GifImageDescriptor",
   "isCompatibility": false,
   "isDnD": false,
   "parent": {
-    "name": "data",
-    "path": "folders/lib/image/filetypes/gif/data.yy",
+    "name": "blocks",
+    "path": "folders/lib/image/filetypes/gif/blocks.yy",
   },
 }

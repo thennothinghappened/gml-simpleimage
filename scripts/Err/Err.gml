@@ -4,9 +4,10 @@
 function Err(_msg, _cause = undefined) constructor {
 	msg = _msg;
 	cause = _cause;
-	site = debug_get_callstack(2)[1];
+	callstack = debug_get_callstack();
+	array_delete(callstack, 0, 1);
 	
 	toString = function() {
-		return $"Error: {msg}\n at {site}" + (cause == undefined ? "" : $"\nCause: {cause}") + "\n";
+		return $"Error: {msg}\n at {string_join_ext("\n at ", callstack)}" + (cause == undefined ? "" : $"\nCause: {cause}") + "\n";
 	}
 }
